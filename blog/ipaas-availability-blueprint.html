@@ -60,6 +60,47 @@
         </section>
 
         <section class="article-section">
+          <h2>Topology Diagram</h2>
+          <p>
+            The blueprint spans two AWS regions with a federated Conductor
+            control plane. Here is a simplified view.
+          </p>
+          <figure class="article-diagram">
+            <svg viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg">
+              <rect width="860" height="380" rx="24" fill="#0f172a" />
+              <rect x="60" y="60" width="320" height="220" rx="16" fill="#111827" stroke="#38bdf8"/>
+              <text x="220" y="90" fill="#f8fafc" font-size="16" text-anchor="middle">Region A</text>
+              <rect x="120" y="110" width="200" height="80" rx="12" fill="#1f2937" stroke="#7dd3fc"/>
+              <text x="220" y="145" fill="#f8fafc" font-size="14" text-anchor="middle">Conductor Control Plane</text>
+              <rect x="120" y="210" width="200" height="60" rx="12" fill="#1f2937" stroke="#7dd3fc"/>
+              <text x="220" y="245" fill="#cbd5f5" font-size="12" text-anchor="middle">Workers + Adapters</text>
+
+              <rect x="480" y="60" width="320" height="220" rx="16" fill="#111827" stroke="#38bdf8"/>
+              <text x="640" y="90" fill="#f8fafc" font-size="16" text-anchor="middle">Region B</text>
+              <rect x="540" y="110" width="200" height="80" rx="12" fill="#1f2937" stroke="#7dd3fc"/>
+              <text x="640" y="145" fill="#f8fafc" font-size="14" text-anchor="middle">Conductor Control Plane (warm)</text>
+              <rect x="540" y="210" width="200" height="60" rx="12" fill="#1f2937" stroke="#7dd3fc"/>
+              <text x="640" y="245" fill="#cbd5f5" font-size="12" text-anchor="middle">Workers + Adapters</text>
+
+              <line x1="380" y1="150" x2="480" y2="150" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow3)" marker-start="url(#arrow3)"/>
+              <line x1="380" y1="240" x2="480" y2="240" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow3)" marker-start="url(#arrow3)"/>
+              <text x="430" y="180" fill="#cbd5f5" font-size="12" text-anchor="middle">State Sync (CDC)</text>
+              <text x="430" y="270" fill="#cbd5f5" font-size="12" text-anchor="middle">Worker Images &amp; Pipelines</text>
+
+              <rect x="260" y="300" width="340" height="50" rx="12" fill="#1f2937" stroke="#7dd3fc" stroke-dasharray="6 6"/>
+              <text x="430" y="332" fill="#f8fafc" font-size="13" text-anchor="middle">Shared Services: DynamoDB global tables • Jenkins • Grafana • PagerDuty</text>
+
+              <defs>
+                <marker id="arrow3" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 z" fill="#38bdf8" />
+                </marker>
+              </defs>
+            </svg>
+            <figcaption>Active/standby regions with CDC-based state sync and mirrored worker pools.</figcaption>
+          </figure>
+        </section>
+
+        <section class="article-section">
           <h2>Data Plane</h2>
           <p>
             Execution workers run on Kubernetes with spot + on-demand mix. State
@@ -101,6 +142,19 @@
               reinventing plumbing.
             </li>
           </ul>
+        </section>
+
+        <section class="article-section">
+          <h2>Adoption Journey</h2>
+          <p>
+            We typically guide product teams through a four-stage adoption:
+          </p>
+          <ol>
+            <li>Model workflows as YAML + define task domains.</li>
+            <li>Pair with platform engineers to implement adapters.</li>
+            <li>Run contract tests + chaos drills in a sandbox.</li>
+            <li>Graduate to production with automated guardrails and SLO dashboards.</li>
+          </ol>
         </section>
 
         <div class="article-footer">

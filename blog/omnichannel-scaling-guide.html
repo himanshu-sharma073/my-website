@@ -64,6 +64,39 @@
         </section>
 
         <section class="article-section">
+          <h2>Channel Architecture Map</h2>
+          <p>
+            Each conversation lane has an ingress tier, a buffering tier, and a
+            delivery tier. The following diagram captures the core flow.
+          </p>
+          <figure class="article-diagram">
+            <svg viewBox="0 0 840 360" xmlns="http://www.w3.org/2000/svg">
+              <rect width="840" height="360" rx="24" fill="#0f172a" />
+              <rect x="50" y="60" width="200" height="100" rx="12" fill="#1f2937" stroke="#38bdf8"/>
+              <text x="150" y="105" fill="#f8fafc" font-size="16" text-anchor="middle">Ingress</text>
+              <text x="150" y="130" fill="#cbd5f5" font-size="12" text-anchor="middle">WebFlux Gateway</text>
+              <rect x="320" y="60" width="200" height="100" rx="12" fill="#1f2937" stroke="#38bdf8"/>
+              <text x="420" y="105" fill="#f8fafc" font-size="16" text-anchor="middle">Buffering</text>
+              <text x="420" y="130" fill="#cbd5f5" font-size="12" text-anchor="middle">Kafka + Redis</text>
+              <rect x="590" y="60" width="200" height="100" rx="12" fill="#1f2937" stroke="#38bdf8"/>
+              <text x="690" y="105" fill="#f8fafc" font-size="16" text-anchor="middle">Delivery</text>
+              <text x="690" y="130" fill="#cbd5f5" font-size="12" text-anchor="middle">Channel Adapters</text>
+              <line x1="250" y1="110" x2="320" y2="110" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow2)"/>
+              <line x1="520" y1="110" x2="590" y2="110" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow2)"/>
+              <rect x="120" y="200" width="600" height="110" rx="16" fill="#111827" stroke="#7dd3fc" stroke-dasharray="5 6"/>
+              <text x="420" y="235" fill="#f8fafc" font-size="16" text-anchor="middle">Observability &amp; Control Plane</text>
+              <text x="420" y="260" fill="#cbd5f5" font-size="12" text-anchor="middle">Grafana dashboards • Jenkins canary • PagerDuty</text>
+              <defs>
+                <marker id="arrow2" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#38bdf8" />
+                </marker>
+              </defs>
+            </svg>
+            <figcaption>Each lane owns ingress, buffering, and delivery tiers backed by a shared control plane.</figcaption>
+          </figure>
+        </section>
+
+        <section class="article-section">
           <h2>Back-pressure Everywhere</h2>
           <p>
             Spring WebFlux gives us a reactive backbone, but the magic happens
@@ -82,6 +115,29 @@
               Wire <strong>Jenkins canary jobs</strong> to watch these meters
               during deploy and auto-roll back when SLOs degrade.
             </li>
+          </ol>
+        </section>
+
+        <section class="article-section">
+          <h2>Design Tenets</h2>
+          <p>We describe every channel lane using four tenets:</p>
+          <ul>
+            <li><strong>Isolation:</strong> noisy neighbors can’t impact other lanes.</li>
+            <li><strong>Observability:</strong> SLOs and budget alerts exist before GA.</li>
+            <li><strong>Automatability:</strong> deployments + rollbacks require a single Jenkins job.</li>
+            <li><strong>Compliance:</strong> data residency settings per lane (EU-only, US-only).</li>
+          </ul>
+        </section>
+
+        <section class="article-section">
+          <h2>Runbook Snapshot</h2>
+          <p>
+            Our runbook includes pre-built flows for:
+          </p>
+          <ol>
+            <li>Fast-draining a Kafka partition when consumer lag exceeds thresholds.</li>
+            <li>Switching traffic to a warm region and rehydrating Redis caches.</li>
+            <li>Automated post-mortem collection (logs, traces, dashboards).</li>
           </ol>
         </section>
 
@@ -106,6 +162,11 @@
             latency and a 20% lift in engagement. Teams deploy 2–3 times per day
             because the guardrails make regressions obvious.
           </p>
+          <ul>
+            <li>p99 response time: 95 ms during peak events.</li>
+            <li>Error budget burn reduced by 35% quarter over quarter.</li>
+            <li>Time-to-detect (TTD) for channel regressions under 3 minutes.</li>
+          </ul>
         </section>
 
         <div class="article-footer">

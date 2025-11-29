@@ -65,6 +65,40 @@
         </section>
 
         <section class="article-section">
+          <h2>Reference Architecture</h2>
+          <p>
+            The diagram below illustrates how domain services, CDC pipelines,
+            and Conductor workers stay coordinated without introducing a single
+            point of failure.
+          </p>
+          <figure class="article-diagram">
+            <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+              <rect width="800" height="360" rx="24" fill="#0f172a" />
+              <rect x="40" y="40" width="220" height="120" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+              <text x="150" y="80" fill="#f8fafc" font-family="Inter" font-size="16" text-anchor="middle">Service A</text>
+              <text x="150" y="105" fill="#cbd5f5" font-size="12" text-anchor="middle">Emit Domain Events</text>
+              <rect x="300" y="40" width="220" height="120" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+              <text x="410" y="80" fill="#f8fafc" font-family="Inter" font-size="16" text-anchor="middle">CDC Stream</text>
+              <text x="410" y="105" fill="#cbd5f5" font-size="12" text-anchor="middle">DynamoDB → Kafka</text>
+              <rect x="560" y="40" width="220" height="120" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+              <text x="670" y="80" fill="#f8fafc" font-family="Inter" font-size="16" text-anchor="middle">Conductor Tasks</text>
+              <text x="670" y="105" fill="#cbd5f5" font-size="12" text-anchor="middle">Workflow Progress</text>
+              <line x1="260" y1="100" x2="300" y2="100" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)"/>
+              <line x1="520" y1="100" x2="560" y2="100" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)"/>
+              <rect x="150" y="200" width="500" height="120" rx="16" fill="#0b1220" stroke="#7dd3fc" stroke-dasharray="6 6"/>
+              <text x="400" y="235" fill="#f8fafc" font-size="16" text-anchor="middle">Saga Orchestration Context</text>
+              <text x="400" y="260" fill="#cbd5f5" font-size="12" text-anchor="middle">Metadata: task domain, retry policy, compensations</text>
+              <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#38bdf8" />
+                </marker>
+              </defs>
+            </svg>
+            <figcaption>Domain events flow through CDC before Conductor advances the saga.</figcaption>
+          </figure>
+        </section>
+
+        <section class="article-section">
           <h2>Workflow Contract</h2>
           <p>
             Every workflow definition includes an explicit
@@ -98,6 +132,40 @@
               CDC and workflow logs can be correlated with Grafana dashboards.
             </li>
           </ol>
+        </section>
+
+        <section class="article-section">
+          <h2>Implementation Checklist</h2>
+          <p>
+            If you are rolling this pattern into your own stack, I recommend
+            advancing through these gates:
+          </p>
+          <ul>
+            <li>
+              Align on the <strong>event taxonomy</strong>—what constitutes a
+              success, failure, timeout?
+            </li>
+            <li>
+              Codify <strong>retry semantics</strong> per domain and document the
+              compensating action.
+            </li>
+            <li>
+              Instrument <strong>end-to-end tracing</strong> before onboarding
+              any production workloads.
+            </li>
+          </ul>
+        </section>
+
+        <section class="article-section">
+          <h2>Metrics That Matter</h2>
+          <p>
+            We treat sagas like product experiences and monitor them with KPIs:
+          </p>
+          <ul>
+            <li>Median orchestration time per workflow.</li>
+            <li>Percentage of compensations triggered per domain.</li>
+            <li>CDC lag between source tables and Conductor consumption.</li>
+          </ul>
         </section>
 
         <section class="article-section">
