@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scaling Omnichannel Services to 100K Daily Interactions</title>
+    <meta
+      name="description"
+      content="Playbook for scaling omnichannel messaging surfaces with Spring WebFlux, back-pressure controls, and observability guardrails."
+    />
+    <link
+      rel="canonical"
+      href="https://www.himanshu-sharma.com/blog/omnichannel-scaling-guide"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  </head>
+  <body class="article-body">
+    <div class="background-noise" aria-hidden="true"></div>
+    <div class="background-grid" aria-hidden="true"></div>
+
+    <header class="article-header-simple">
+      <div class="identity">
+        <div class="monogram">HS</div>
+        <div>
+          <p class="eyebrow">Himanshu Sharma</p>
+          <p class="title">Lead Platform Engineer</p>
+        </div>
+      </div>
+      <a class="contact-chip" href="../index.html">← Back to portfolio</a>
+    </header>
+
+    <main class="article-shell">
+      <article class="article-content">
+        <p class="eyebrow">Scaling • Observability</p>
+        <h1>Scaling Omnichannel Services to 100K Daily Interactions</h1>
+        <p class="article-summary">
+          Messaging is unforgiving—latency spikes translate directly to revenue
+          hits. This is the reference architecture I used at Freshworks to keep
+          WhatsApp, email, SMS, and voice channels reliable as traffic tripled.
+        </p>
+        <div class="article-meta">
+          <span>Author: Himanshu Sharma</span>
+          <span>Last updated: Nov 2025</span>
+          <span>Reading time: 6 min</span>
+        </div>
+
+        <section class="article-section">
+          <h2>Layered Capacity Planning</h2>
+          <p>
+            Instead of planning capacity per microservice, we scope by
+            <em>conversation lane</em> (SMS, WhatsApp, voice). Each lane owns:
+          </p>
+          <ul>
+            <li>An autoscaled WebFlux ingress tier with bounded connection pool.</li>
+            <li>
+              Dedicated Kafka partitions tuned for the lane’s throughput
+              distribution.
+            </li>
+            <li>
+              Failover templates that reroute traffic to a warm standby region.
+            </li>
+          </ul>
+        </section>
+
+        <section class="article-section">
+          <h2>Back-pressure Everywhere</h2>
+          <p>
+            Spring WebFlux gives us a reactive backbone, but the magic happens
+            when we propagate demand signals end-to-end:
+          </p>
+          <ol>
+            <li>
+              Apply <strong>rate-aware batching</strong> before calling third-party
+              APIs.
+            </li>
+            <li>
+              Emit <strong>custom Micrometer meters</strong> for queue depth and
+              consumer lag, surfacing them in Grafana.
+            </li>
+            <li>
+              Wire <strong>Jenkins canary jobs</strong> to watch these meters
+              during deploy and auto-roll back when SLOs degrade.
+            </li>
+          </ol>
+        </section>
+
+        <section class="article-section">
+          <h2>Observability Guardrails</h2>
+          <p>
+            Engineering teams get a single Grafana dashboard with four tiles:
+            ingestion latency, downstream success, queue depth, and error budget
+            burn. Every tile maps to PagerDuty policies so on-call responders
+            have consistent triggers.
+          </p>
+          <div class="article-note">
+            Bonus: pair the dashboard with synthetic monitors to replay common
+            journeys (OTP, ticket assignments) every minute.
+          </div>
+        </section>
+
+        <section class="article-section">
+          <h2>Results</h2>
+          <p>
+            The platform now handles 100K+ daily interactions with sub-100 ms
+            latency and a 20% lift in engagement. Teams deploy 2–3 times per day
+            because the guardrails make regressions obvious.
+          </p>
+        </section>
+
+        <div class="article-footer">
+          <p>Need help scaling your messaging surface?</p>
+          <a href="../index.html#contact">Book a chat →</a>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>
+

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blueprint: High-Availability iPaaS on Netflix Conductor</title>
+    <meta
+      name="description"
+      content="Reference architecture for building a resilient integration platform powered by Netflix Conductor, CDC, and multi-region automation."
+    />
+    <link
+      rel="canonical"
+      href="https://www.himanshu-sharma.com/blog/ipaas-availability-blueprint"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  </head>
+  <body class="article-body">
+    <div class="background-noise" aria-hidden="true"></div>
+    <div class="background-grid" aria-hidden="true"></div>
+
+    <header class="article-header-simple">
+      <div class="identity">
+        <div class="monogram">HS</div>
+        <div>
+          <p class="eyebrow">Himanshu Sharma</p>
+          <p class="title">Lead Platform Engineer</p>
+        </div>
+      </div>
+      <a class="contact-chip" href="../index.html">← Back to portfolio</a>
+    </header>
+
+    <main class="article-shell">
+      <article class="article-content">
+        <p class="eyebrow">Architecture • iPaaS</p>
+        <h1>Blueprint: High-Availability iPaaS on Netflix Conductor</h1>
+        <p class="article-summary">
+          The Freshworks integration platform now orchestrates 30+ workflows
+          with 99.9% release reliability. This blueprint captures the
+          architecture choices that keep the system resilient.
+        </p>
+        <div class="article-meta">
+          <span>Author: Himanshu Sharma</span>
+          <span>Last updated: Nov 2025</span>
+          <span>Reading time: 8 min</span>
+        </div>
+
+        <section class="article-section">
+          <h2>Control Plane</h2>
+          <p>
+            Conductor acts as the control plane, while workflow definitions live
+            in Git and are promoted via Jenkins pipelines. Every workflow
+            declares:
+          </p>
+          <ul>
+            <li>Task domains + owners.</li>
+            <li>Retry &amp; compensation policy.</li>
+            <li>Compliance metadata (PII, PCI tags).</li>
+          </ul>
+        </section>
+
+        <section class="article-section">
+          <h2>Data Plane</h2>
+          <p>
+            Execution workers run on Kubernetes with spot + on-demand mix. State
+            synchronization uses DynamoDB global tables plus MySQL read replicas
+            for reporting workloads. CDC pipelines ensure region-to-region
+            parity during migrations.
+          </p>
+        </section>
+
+        <section class="article-section">
+          <h2>Reliability Tactics</h2>
+          <ol>
+            <li>
+              <strong>Automated runbooks:</strong> Conductor events feed PagerDuty
+              and trigger remediation Lambdas.
+            </li>
+            <li>
+              <strong>Release safety:</strong> Jenkins pipelines run contract
+              tests for every workflow + backfill a shadow environment.
+            </li>
+            <li>
+              <strong>Blast-radius limits:</strong> Circuit breakers per task
+              domain halt only the affected integrations.
+            </li>
+          </ol>
+        </section>
+
+        <section class="article-section">
+          <h2>What Teams Get</h2>
+          <p>
+            Product teams plug into the platform through declarative workflow
+            packs. They gain:
+          </p>
+          <ul>
+            <li>Telemetry by default (Prometheus + Grafana dashboards).</li>
+            <li>Ability to simulate failures via chaos toggles.</li>
+            <li>
+              Shared libraries for building adapters in Java or Node.js without
+              reinventing plumbing.
+            </li>
+          </ul>
+        </section>
+
+        <div class="article-footer">
+          <p>Want a copy of the full architecture kit?</p>
+          <a href="../index.html#contact">Request the blueprint →</a>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>
+

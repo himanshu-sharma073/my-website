@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sections = [...document.querySelectorAll("main section")];
   const navLinks = [...document.querySelectorAll(".site-nav a")];
+  const navToggle = document.querySelector(".nav-toggle");
 
   const activateLink = (id) => {
     navLinks.forEach((link) => {
@@ -51,6 +52,22 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   sections.forEach((section) => navObserver.observe(section));
+
+  if (navToggle) {
+    navToggle.addEventListener("click", () => {
+      const isOpen = document.body.classList.toggle("nav-open");
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+    });
+  }
+
+  navLinks.forEach((link) =>
+    link.addEventListener("click", () => {
+      if (document.body.classList.contains("nav-open") && navToggle) {
+        document.body.classList.remove("nav-open");
+        navToggle.setAttribute("aria-expanded", "false");
+      }
+    })
+  );
 
   const yearEl = document.querySelector("#year");
   if (yearEl) {

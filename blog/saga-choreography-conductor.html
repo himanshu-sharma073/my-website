@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Designing Saga Choreography for Workflow Engines</title>
+    <meta
+      name="description"
+      content="How Himanshu Sharma applies saga choreography and CDC to keep Netflix Conductor workflows consistent across microservices."
+    />
+    <link
+      rel="canonical"
+      href="https://www.himanshu-sharma.com/blog/saga-choreography-conductor"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  </head>
+  <body class="article-body">
+    <div class="background-noise" aria-hidden="true"></div>
+    <div class="background-grid" aria-hidden="true"></div>
+
+    <header class="article-header-simple">
+      <div class="identity">
+        <div class="monogram">HS</div>
+        <div>
+          <p class="eyebrow">Himanshu Sharma</p>
+          <p class="title">Lead Platform Engineer</p>
+        </div>
+      </div>
+      <a class="contact-chip" href="../index.html">← Back to portfolio</a>
+    </header>
+
+    <main class="article-shell">
+      <article class="article-content">
+        <p class="eyebrow">Microservices • Saga Pattern</p>
+        <h1>Designing Saga Choreography for Workflow Engines</h1>
+        <p class="article-summary">
+          Netflix Conductor orchestrates 30+ critical workflows inside our
+          Freshworks iPaaS. Here is how I pair saga choreography with Change
+          Data Capture (CDC) to keep microservices consistent without slowing
+          down developer velocity.
+        </p>
+        <div class="article-meta">
+          <span>Author: Himanshu Sharma</span>
+          <span>Last updated: Nov 2025</span>
+          <span>Reading time: 7 min</span>
+        </div>
+
+        <section class="article-section">
+          <h2>Why Saga + CDC?</h2>
+          <p>
+            Traditional two-phase commit approaches buckle under the latency
+            profile of omnichannel integrations. Saga choreography allows every
+            service to manage its own compensation logic, while CDC guarantees
+            that state changes are visible to Conductor in near real time.
+          </p>
+          <ul>
+            <li>Each service emits domain events to DynamoDB streams.</li>
+            <li>CDC relays events into Kafka topics dedicated per domain.</li>
+            <li>
+              Conductor tasks subscribe to those topics to decide progression or
+              rollback.
+            </li>
+          </ul>
+        </section>
+
+        <section class="article-section">
+          <h2>Workflow Contract</h2>
+          <p>
+            Every workflow definition includes an explicit
+            <strong>task domain contract</strong> so we can route execution to
+            language-specific workers (Java WebFlux vs. Node.js). Domains also
+            control isolation boundaries for throttling and alerting.
+          </p>
+          <div class="article-note">
+            Pro tip: expose the contract via metadata so UI and API consumers
+            can search workflows by domain (now supported upstream via my PR
+            #492).
+          </div>
+        </section>
+
+        <section class="article-section">
+          <h2>Choreography Guardrails</h2>
+          <p>
+            Choreography can devolve into spaghetti if not governed. I enforce a
+            few non-negotiables:
+          </p>
+          <ol>
+            <li>
+              <strong>Idempotent tasks</strong> with deterministic compensation.
+            </li>
+            <li>
+              <strong>Time-boxed states</strong>: every task publishes heartbeat
+              events so Conductor can trigger retries or compensations.
+            </li>
+            <li>
+              <strong>Tracing parity</strong>: propagate OpenTelemetry baggage so
+              CDC and workflow logs can be correlated with Grafana dashboards.
+            </li>
+          </ol>
+        </section>
+
+        <section class="article-section">
+          <h2>Operational Outcomes</h2>
+          <p>
+            By combining CDC + saga we reduced reconciliation incidents by 60%,
+            and onboarding a new workflow now takes hours rather than days.
+            Developers work inside their preferred stack, while platform teams
+            maintain real-time visibility through Conductor’s summary index.
+          </p>
+        </section>
+
+        <div class="article-footer">
+          <p>Have thoughts on saga choreography? Let’s chat.</p>
+          <a href="../index.html#contact">Continue the conversation →</a>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>
+
