@@ -15,11 +15,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       },
       {
-        threshold: 0.2,
+        threshold: 0.1,
+        rootMargin: "50px",
       }
     );
 
-    revealTargets.forEach((target) => revealObserver.observe(target));
+    revealTargets.forEach((target) => {
+      // Check if element is already in viewport on load
+      const rect = target.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight + 50 && rect.bottom > -50;
+      if (isVisible) {
+        target.classList.add("is-visible");
+      } else {
+        revealObserver.observe(target);
+      }
+    });
   } else {
     revealTargets.forEach((target) => target.classList.add("is-visible"));
   }
