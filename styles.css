@@ -468,6 +468,15 @@ section {
   margin-top: 0.4rem;
 }
 
+.contrib-card code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 0.9em;
+  padding: 0.15em 0.4em;
+  background: rgba(56, 189, 248, 0.15);
+  border-radius: 4px;
+  color: var(--accent);
+}
+
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

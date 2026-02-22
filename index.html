@@ -311,6 +311,32 @@
             <li>Shipped upstream and merged into main on Apr&nbsp;29, 2025.</li>
           </ul>
         </div>
+        <div class="contrib-card">
+          <header>
+            <p class="eyebrow">conductor-oss/conductor</p>
+            <h3>
+              <a
+                href="https://github.com/conductor-oss/conductor/pull/766"
+                target="_blank"
+                rel="noreferrer"
+                >Fix: Prevent duplicate workflow termination notifications</a
+              >
+            </h3>
+          </header>
+          <p>
+            Added a guard clause in <code>terminateWorkflow()</code> to prevent
+            duplicate termination operations when a workflow is already in
+            <code>TERMINATED</code> status, eliminating redundant notifications
+            and unnecessary DB updates.
+          </p>
+          <ul>
+            <li>Early return for already-terminated workflows, avoiding duplicate notifications.</li>
+            <li>Preserves idempotency: COMPLETED workflows still throw ConflictException as expected.</li>
+            <li>Includes test coverage for guard behavior and double-call idempotency.</li>
+            <li>Merged upstream on Feb&nbsp;17, 2026.</li>
+          </ul>
+        </div>
+      </section>
 
       <section id="skills" class="section observe">
         <div class="section-label">Core Toolkit</div>
