@@ -1,0 +1,19 @@
+{
+  "name": "Himanshu Sharma — Lead Platform Engineer",
+  "short_name": "Himanshu Sharma",
+  "description": "Portfolio of Himanshu Sharma: iPaaS, microservices, knowledge graphs, and AI agent orchestration.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#030407",
+  "theme_color": "#030407",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

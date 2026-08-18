@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Durable Orchestration for AI Agents on Conductor | Himanshu Sharma</title>
+    <meta
+      name="description"
+      content="Run multi-agent plans as durable Netflix Conductor workflows: planner, tools, human-in-the-loop, compensations, and evals. By Himanshu Sharma."
+    />
+    <meta name="author" content="Himanshu Sharma" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#030407" />
+    <link rel="canonical" href="https://www.himanshu-sharma.com/blog/durable-agent-orchestration.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Himanshu Sharma" />
+    <meta property="og:title" content="Durable Orchestration for AI Agents on Conductor" />
+    <meta property="og:description" content="Map agent plans onto Conductor tasks with retries, HITL, and task domains." />
+    <meta property="og:url" content="https://www.himanshu-sharma.com/blog/durable-agent-orchestration.html" />
+    <meta property="og:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Durable Orchestration for AI Agents on Conductor" />
+    <meta name="twitter:description" content="Durable multi-agent workflows on Netflix Conductor." />
+    <meta name="twitter:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="stylesheet" href="../styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Durable Orchestration for AI Agents on Conductor",
+        "description": "How to run multi-agent plans as durable Netflix Conductor workflows.",
+        "author": { "@type": "Person", "name": "Himanshu Sharma", "url": "https://www.himanshu-sharma.com/" },
+        "mainEntityOfPage": "https://www.himanshu-sharma.com/blog/durable-agent-orchestration.html",
+        "image": "https://www.himanshu-sharma.com/assets/og-cover.svg",
+        "dateModified": "2026-08-18",
+        "keywords": ["AI Agents", "Netflix Conductor", "Orchestration"]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.himanshu-sharma.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blogs", "item": "https://www.himanshu-sharma.com/#blog" },
+          { "@type": "ListItem", "position": 3, "name": "Durable agent orchestration", "item": "https://www.himanshu-sharma.com/blog/durable-agent-orchestration.html" }
+        ]
+      }
+    </script>
+  </head>
+  <body class="article-body">
+    <div class="background-noise" aria-hidden="true"></div>
+    <div class="background-grid" aria-hidden="true"></div>
+    <header class="article-header-simple">
+      <div class="identity">
+        <div class="monogram">HS</div>
+        <div>
+          <p class="eyebrow">Himanshu Sharma</p>
+          <p class="title">Lead Platform Engineer</p>
+        </div>
+      </div>
+      <a class="contact-chip" href="../index.html#blog">← All blogs</a>
+    </header>
+    <main class="article-shell">
+      <div class="article-layout">
+        <article class="article-content">
+          <p class="eyebrow">AI Agents • Orchestration • Conductor</p>
+          <h1>Durable Orchestration for AI Agents on Conductor</h1>
+          <p class="article-summary">
+            Conductor is an event-driven engine for applications <em>and</em>
+            AI agents. The trick is mapping a model’s plan onto tasks the
+            platform already knows how to retry, compensate, and audit—the
+            same primitives we use for iPaaS sagas.
+          </p>
+          <div class="article-meta">
+            <span>Author: Himanshu Sharma</span>
+            <span>Updated: Aug 2026</span>
+            <span>12 min read</span>
+          </div>
+
+          <section class="article-section" id="map">
+            <h2>Map agent concepts to workflow tasks</h2>
+            <table class="compare-table">
+              <thead>
+                <tr><th>Agent concept</th><th>Conductor primitive</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Plan / decompose</td><td><code>LLM_PLAN</code> worker</td><td>Pure function: JSON plan out, no side effects</td></tr>
+                <tr><td>Tool call</td><td>Domain task (CRM, SMS…)</td><td>Idempotent, compensated</td></tr>
+                <tr><td>Ask a human</td><td><code>WAIT</code> / human task</td><td>SLA timeout → escalate</td></tr>
+                <tr><td>Reflect / critic</td><td>Decision task</td><td>May loop with max iterations</td></tr>
+                <tr><td>Stop</td><td>Terminal status</td><td>Must be idempotent (PR #766)</td></tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section class="article-section" id="flow">
+            <h2>A typical agent run</h2>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 320" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="320" rx="24" fill="#0f172a"/>
+                <rect x="20" y="40" width="130" height="70" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="85" y="70" fill="#e2e8f0" font-size="12" text-anchor="middle">Intent</text>
+                <text x="85" y="88" fill="#94a3b8" font-size="10" text-anchor="middle">API / bot</text>
+                <rect x="170" y="40" width="130" height="70" rx="10" fill="#1e293b" stroke="#818cf8"/>
+                <text x="235" y="70" fill="#e2e8f0" font-size="12" text-anchor="middle">Retrieve</text>
+                <text x="235" y="88" fill="#94a3b8" font-size="10" text-anchor="middle">graph + memory</text>
+                <rect x="320" y="40" width="130" height="70" rx="10" fill="#1e293b" stroke="#818cf8"/>
+                <text x="385" y="70" fill="#e2e8f0" font-size="12" text-anchor="middle">Plan</text>
+                <text x="385" y="88" fill="#94a3b8" font-size="10" text-anchor="middle">LLM worker</text>
+                <rect x="470" y="40" width="130" height="70" rx="10" fill="#1e293b" stroke="#34d399"/>
+                <text x="535" y="70" fill="#e2e8f0" font-size="12" text-anchor="middle">Tools</text>
+                <text x="535" y="88" fill="#94a3b8" font-size="10" text-anchor="middle">iPaaS adapters</text>
+                <rect x="620" y="40" width="100" height="70" rx="10" fill="#1e293b" stroke="#fbbf24"/>
+                <text x="670" y="70" fill="#fde68a" font-size="12" text-anchor="middle">HITL?</text>
+                <rect x="740" y="40" width="100" height="70" rx="10" fill="#14532d" stroke="#34d399"/>
+                <text x="790" y="80" fill="#bbf7d0" font-size="12" text-anchor="middle">Done</text>
+                <line x1="150" y1="75" x2="170" y2="75" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="300" y1="75" x2="320" y2="75" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="450" y1="75" x2="470" y2="75" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="600" y1="75" x2="620" y2="75" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="720" y1="75" x2="740" y2="75" stroke="#34d399" stroke-width="2"/>
+                <rect x="170" y="160" width="520" height="120" rx="14" fill="#111827" stroke="#64748b" stroke-dasharray="5 4"/>
+                <text x="430" y="195" fill="#e2e8f0" font-size="13" text-anchor="middle">Loop: critic scores result → replan or compensate</text>
+                <text x="430" y="220" fill="#94a3b8" font-size="12" text-anchor="middle">maxIterations on workflow · poison after N · never unbounded LLM while</text>
+                <text x="430" y="245" fill="#67e8f9" font-size="12" text-anchor="middle">Each tool task writes CDC so graph + audit stay consistent</text>
+                <line x1="535" y1="110" x2="430" y2="160" stroke="#34d399" stroke-width="1.5" stroke-dasharray="4 3"/>
+              </svg>
+              <figcaption>The LLM only appears in Plan/Critic boxes. Tools are ordinary Conductor tasks.</figcaption>
+            </figure>
+            <div class="callout">
+              Cap loops. An agent that can replan forever is a cost and safety
+              incident. Encode <code>maxIterations</code>, token budgets, and a
+              terminal <code>FAILED_BUDGET</code> status.
+            </div>
+          </section>
+
+          <section class="article-section" id="domains">
+            <h2>Task domains for specialist agents</h2>
+            <p>
+              Route <code>planner</code>, <code>crm-tools</code>,
+              <code>comms-tools</code>, and <code>graph-writer</code> as
+              separate Conductor task domains. That reuses worker isolation,
+              throttles, and the summary-index filter from PR #492. A noisy
+              retrieval worker cannot starve SMS delivery.
+            </p>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="220" rx="24" fill="#0f172a"/>
+                <rect x="30" y="40" width="800" height="50" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="430" y="70" fill="#e2e8f0" font-size="14" text-anchor="middle">Conductor queues partitioned by task domain</text>
+                <rect x="40" y="120" width="180" height="70" rx="10" fill="#111827" stroke="#818cf8"/>
+                <text x="130" y="150" fill="#c4b5fd" font-size="12" text-anchor="middle">planner</text>
+                <text x="130" y="168" fill="#94a3b8" font-size="10" text-anchor="middle">GPU / LLM pool</text>
+                <rect x="240" y="120" width="180" height="70" rx="10" fill="#111827" stroke="#38bdf8"/>
+                <text x="330" y="150" fill="#7dd3fc" font-size="12" text-anchor="middle">crm-tools</text>
+                <text x="330" y="168" fill="#94a3b8" font-size="10" text-anchor="middle">Java workers</text>
+                <rect x="440" y="120" width="180" height="70" rx="10" fill="#111827" stroke="#34d399"/>
+                <text x="530" y="150" fill="#86efac" font-size="12" text-anchor="middle">comms-tools</text>
+                <text x="530" y="168" fill="#94a3b8" font-size="10" text-anchor="middle">Node workers</text>
+                <rect x="640" y="120" width="180" height="70" rx="10" fill="#111827" stroke="#fbbf24"/>
+                <text x="730" y="150" fill="#fde68a" font-size="12" text-anchor="middle">graph-writer</text>
+                <text x="730" y="168" fill="#94a3b8" font-size="10" text-anchor="middle">KG mutations</text>
+              </svg>
+              <figcaption>Same isolation story as omnichannel lanes: domains, not one shared worker farm.</figcaption>
+            </figure>
+          </section>
+
+          <section class="article-section" id="fail">
+            <h2>Failure, duplicate signals, HITL</h2>
+            <p>
+              Agent runs get terminated from UI, budgets, and parent workflows.
+              Duplicate terminate notifications spam operators and confuse
+              downstream agents. The
+              <a href="https://github.com/conductor-oss/conductor/pull/766" target="_blank" rel="noreferrer">duplicate-termination guard</a>
+              is not a nicety for agent platforms—it is correctness.
+            </p>
+            <ol>
+              <li>Tool failure → compensate that step, critic decides replan vs abort.</li>
+              <li>Human timeout → escalate domain, do not silently succeed.</li>
+              <li>Already TERMINATED → no-op, no second webhook to the product.</li>
+            </ol>
+          </section>
+
+          <div class="related-posts">
+            <a href="agentic-platform-architecture.html"><span>Architecture</span>Full agentic stack</a>
+            <a href="saga-choreography-conductor.html"><span>Sagas</span>Compensation patterns</a>
+            <a href="agent-tools-knowledge-graph.html"><span>Tools</span>Graph-backed tools</a>
+          </div>
+        </article>
+        <aside class="article-toc">
+          <p>On this page</p>
+          <a href="#map">Concept mapping</a>
+          <a href="#flow">Agent run</a>
+          <a href="#domains">Task domains</a>
+          <a href="#fail">Failure modes</a>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>

@@ -3,22 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blueprint: High-Availability iPaaS on Netflix Conductor</title>
+    <title>High-Availability iPaaS on Netflix Conductor | Himanshu Sharma</title>
     <meta
       name="description"
-      content="Reference architecture for building a resilient integration platform powered by Netflix Conductor, CDC, and multi-region automation."
+      content="Reference architecture for a resilient iPaaS on Netflix Conductor with multi-region CDC, workers, and release safety. By Himanshu Sharma."
     />
-    <link
-      rel="canonical"
-      href="https://www.himanshu-sharma.com/blog/ipaas-availability-blueprint"
-    />
-    <link rel="stylesheet" href="../styles.css" />
+    <meta name="author" content="Himanshu Sharma" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#030407" />
+    <link rel="canonical" href="https://www.himanshu-sharma.com/blog/ipaas-availability-blueprint.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Himanshu Sharma" />
+    <meta property="og:title" content="Blueprint: High-Availability iPaaS on Netflix Conductor" />
+    <meta property="og:description" content="Control plane, data plane, and multi-region topology for an enterprise iPaaS." />
+    <meta property="og:url" content="https://www.himanshu-sharma.com/blog/ipaas-availability-blueprint.html" />
+    <meta property="og:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="High-Availability iPaaS on Netflix Conductor" />
+    <meta name="twitter:description" content="Multi-region Conductor iPaaS with CDC and release safety." />
+    <meta name="twitter:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="stylesheet" href="../styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Blueprint: High-Availability iPaaS on Netflix Conductor",
+        "description": "Reference architecture for a resilient iPaaS on Netflix Conductor with multi-region CDC.",
+        "author": { "@type": "Person", "name": "Himanshu Sharma", "url": "https://www.himanshu-sharma.com/" },
+        "mainEntityOfPage": "https://www.himanshu-sharma.com/blog/ipaas-availability-blueprint.html",
+        "image": "https://www.himanshu-sharma.com/assets/og-cover.svg",
+        "dateModified": "2026-08-18"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.himanshu-sharma.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blogs", "item": "https://www.himanshu-sharma.com/#blog" },
+          { "@type": "ListItem", "position": 3, "name": "iPaaS blueprint", "item": "https://www.himanshu-sharma.com/blog/ipaas-availability-blueprint.html" }
+        ]
+      }
+    </script>
   </head>
   <body class="article-body">
     <div class="background-noise" aria-hidden="true"></div>
     <div class="background-grid" aria-hidden="true"></div>
-
     <header class="article-header-simple">
       <div class="identity">
         <div class="monogram">HS</div>
@@ -27,142 +59,134 @@
           <p class="title">Lead Platform Engineer</p>
         </div>
       </div>
-      <a class="contact-chip" href="../index.html">← Back to portfolio</a>
+      <a class="contact-chip" href="../index.html#blog">← All blogs</a>
     </header>
-
     <main class="article-shell">
-      <article class="article-content">
-        <p class="eyebrow">Architecture • iPaaS</p>
-        <h1>Blueprint: High-Availability iPaaS on Netflix Conductor</h1>
-        <p class="article-summary">
-          The Freshworks integration platform now orchestrates 30+ workflows
-          with 99.9% release reliability. This blueprint captures the
-          architecture choices that keep the system resilient.
-        </p>
-        <div class="article-meta">
-          <span>Author: Himanshu Sharma</span>
-          <span>Last updated: Nov 2025</span>
-          <span>Reading time: 8 min</span>
-        </div>
-
-        <section class="article-section">
-          <h2>Control Plane</h2>
-          <p>
-            Conductor acts as the control plane, while workflow definitions live
-            in Git and are promoted via Jenkins pipelines. Every workflow
-            declares:
+      <div class="article-layout">
+        <article class="article-content">
+          <p class="eyebrow">Architecture • iPaaS • Conductor</p>
+          <h1>Blueprint: High-Availability iPaaS on Netflix Conductor</h1>
+          <p class="article-summary">
+            The Freshworks integration platform orchestrates 30+ workflows at
+            99.9% release reliability. This is the control-plane / data-plane
+            split, multi-region topology, and adoption path we use—including
+            workflows that drive AI agents.
           </p>
-          <ul>
-            <li>Task domains + owners.</li>
-            <li>Retry &amp; compensation policy.</li>
-            <li>Compliance metadata (PII, PCI tags).</li>
-          </ul>
-        </section>
+          <div class="article-meta">
+            <span>Author: Himanshu Sharma</span>
+            <span>Updated: Aug 2026</span>
+            <span>13 min read</span>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-pill"><strong>99.9%</strong><span>release reliability</span></div>
+            <div class="stat-pill"><strong>30+</strong><span>critical workflows</span></div>
+            <div class="stat-pill"><strong>2</strong><span>AWS regions</span></div>
+          </div>
 
-        <section class="article-section">
-          <h2>Topology Diagram</h2>
-          <p>
-            The blueprint spans two AWS regions with a federated Conductor
-            control plane. Here is a simplified view.
-          </p>
-          <figure class="article-diagram">
-            <svg viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg">
-              <rect width="860" height="380" rx="24" fill="#0f172a" />
-              <rect x="60" y="60" width="320" height="220" rx="16" fill="#111827" stroke="#38bdf8"/>
-              <text x="220" y="90" fill="#f8fafc" font-size="16" text-anchor="middle">Region A</text>
-              <rect x="120" y="110" width="200" height="80" rx="12" fill="#1f2937" stroke="#7dd3fc"/>
-              <text x="220" y="145" fill="#f8fafc" font-size="14" text-anchor="middle">Conductor Control Plane</text>
-              <rect x="120" y="210" width="200" height="60" rx="12" fill="#1f2937" stroke="#7dd3fc"/>
-              <text x="220" y="245" fill="#cbd5f5" font-size="12" text-anchor="middle">Workers + Adapters</text>
+          <section class="article-section" id="planes">
+            <h2>Control plane vs data plane</h2>
+            <p>
+              Conductor is the control plane. Workflow YAML lives in Git and
+              promotes through Jenkins. Workers and adapters are the data plane
+              on Kubernetes (spot + on-demand mix).
+            </p>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="340" rx="24" fill="#0f172a"/>
+                <rect x="30" y="30" width="380" height="280" rx="16" fill="#111827" stroke="#38bdf8"/>
+                <text x="220" y="60" fill="#7dd3fc" font-size="14" text-anchor="middle">CONTROL PLANE</text>
+                <rect x="60" y="80" width="320" height="50" rx="8" fill="#1e293b"/>
+                <text x="220" y="110" fill="#e2e8f0" font-size="13" text-anchor="middle">Git workflow packs + owners</text>
+                <rect x="60" y="145" width="320" height="50" rx="8" fill="#1e293b"/>
+                <text x="220" y="175" fill="#e2e8f0" font-size="13" text-anchor="middle">Conductor server + summary index</text>
+                <rect x="60" y="210" width="320" height="70" rx="8" fill="#1e293b"/>
+                <text x="220" y="240" fill="#e2e8f0" font-size="13" text-anchor="middle">Jenkins · contract tests</text>
+                <text x="220" y="260" fill="#94a3b8" font-size="11" text-anchor="middle">shadow env · canary · rollback</text>
+                <rect x="450" y="30" width="380" height="280" rx="16" fill="#111827" stroke="#34d399"/>
+                <text x="640" y="60" fill="#86efac" font-size="14" text-anchor="middle">DATA PLANE</text>
+                <rect x="480" y="80" width="320" height="50" rx="8" fill="#1e293b"/>
+                <text x="640" y="110" fill="#e2e8f0" font-size="13" text-anchor="middle">K8s workers (Java / Node)</text>
+                <rect x="480" y="145" width="320" height="50" rx="8" fill="#1e293b"/>
+                <text x="640" y="175" fill="#e2e8f0" font-size="13" text-anchor="middle">Adapters · bots · agent tools</text>
+                <rect x="480" y="210" width="320" height="70" rx="8" fill="#1e293b"/>
+                <text x="640" y="240" fill="#e2e8f0" font-size="13" text-anchor="middle">DynamoDB global + CDC</text>
+                <text x="640" y="260" fill="#94a3b8" font-size="11" text-anchor="middle">MySQL replicas for reporting</text>
+              </svg>
+              <figcaption>Definitions and promotion live left; execution and state live right.</figcaption>
+            </figure>
+          </section>
 
-              <rect x="480" y="60" width="320" height="220" rx="16" fill="#111827" stroke="#38bdf8"/>
-              <text x="640" y="90" fill="#f8fafc" font-size="16" text-anchor="middle">Region B</text>
-              <rect x="540" y="110" width="200" height="80" rx="12" fill="#1f2937" stroke="#7dd3fc"/>
-              <text x="640" y="145" fill="#f8fafc" font-size="14" text-anchor="middle">Conductor Control Plane (warm)</text>
-              <rect x="540" y="210" width="200" height="60" rx="12" fill="#1f2937" stroke="#7dd3fc"/>
-              <text x="640" y="245" fill="#cbd5f5" font-size="12" text-anchor="middle">Workers + Adapters</text>
+          <section class="article-section" id="regions">
+            <h2>Multi-region topology</h2>
+            <p>
+              Active/warm standby across two AWS regions. CDC keeps state
+              equivalent; worker images and pipelines are mirrored so failover
+              is a DNS + queue drain, not a rebuild.
+            </p>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="380" rx="24" fill="#0f172a"/>
+                <rect x="40" y="40" width="340" height="230" rx="16" fill="#111827" stroke="#38bdf8"/>
+                <text x="210" y="72" fill="#f8fafc" font-size="15" text-anchor="middle">Region A · active</text>
+                <rect x="70" y="95" width="280" height="70" rx="10" fill="#1f2937" stroke="#7dd3fc"/>
+                <text x="210" y="136" fill="#e2e8f0" font-size="13" text-anchor="middle">Conductor + workers</text>
+                <rect x="70" y="180" width="280" height="60" rx="10" fill="#1f2937" stroke="#7dd3fc"/>
+                <text x="210" y="216" fill="#94a3b8" font-size="12" text-anchor="middle">Local queues + caches</text>
+                <rect x="480" y="40" width="340" height="230" rx="16" fill="#111827" stroke="#818cf8"/>
+                <text x="650" y="72" fill="#f8fafc" font-size="15" text-anchor="middle">Region B · warm</text>
+                <rect x="510" y="95" width="280" height="70" rx="10" fill="#1f2937" stroke="#c4b5fd"/>
+                <text x="650" y="136" fill="#e2e8f0" font-size="13" text-anchor="middle">Conductor (warm) + workers</text>
+                <rect x="510" y="180" width="280" height="60" rx="10" fill="#1f2937" stroke="#c4b5fd"/>
+                <text x="650" y="216" fill="#94a3b8" font-size="12" text-anchor="middle">Replicated queues + caches</text>
+                <line x1="380" y1="130" x2="480" y2="130" stroke="#38bdf8" stroke-width="2"/>
+                <text x="430" y="120" fill="#67e8f9" font-size="11" text-anchor="middle">CDC</text>
+                <rect x="180" y="300" width="500" height="50" rx="12" fill="#1f2937" stroke="#34d399" stroke-dasharray="5 4"/>
+                <text x="430" y="330" fill="#bbf7d0" font-size="12" text-anchor="middle">Shared: DynamoDB global tables · Jenkins · Grafana · PagerDuty</text>
+              </svg>
+              <figcaption>Warm region is always running workers; promotion is traffic, not bootstrap.</figcaption>
+            </figure>
+          </section>
 
-              <line x1="380" y1="150" x2="480" y2="150" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow3)" marker-start="url(#arrow3)"/>
-              <line x1="380" y1="240" x2="480" y2="240" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow3)" marker-start="url(#arrow3)"/>
-              <text x="430" y="180" fill="#cbd5f5" font-size="12" text-anchor="middle">State Sync (CDC)</text>
-              <text x="430" y="270" fill="#cbd5f5" font-size="12" text-anchor="middle">Worker Images &amp; Pipelines</text>
+          <section class="article-section" id="reliability">
+            <h2>Reliability tactics</h2>
+            <ol>
+              <li><strong>Automated runbooks:</strong> Conductor events feed PagerDuty and remediation Lambdas.</li>
+              <li><strong>Release safety:</strong> contract tests per workflow plus a shadow environment.</li>
+              <li><strong>Blast-radius limits:</strong> circuit breakers per task domain.</li>
+              <li><strong>Idempotent terminate:</strong> skip already-terminated workflows
+                (<a href="https://github.com/conductor-oss/conductor/pull/766" target="_blank" rel="noreferrer">PR #766</a>).</li>
+            </ol>
+            <div class="callout">
+              Product teams consume declarative workflow packs. They get
+              telemetry, chaos toggles, and Java/Node adapter libraries by default.
+              Agent tool-calls are just another adapter family on this plane.
+            </div>
+          </section>
 
-              <rect x="260" y="300" width="340" height="50" rx="12" fill="#1f2937" stroke="#7dd3fc" stroke-dasharray="6 6"/>
-              <text x="430" y="332" fill="#f8fafc" font-size="13" text-anchor="middle">Shared Services: DynamoDB global tables • Jenkins • Grafana • PagerDuty</text>
+          <section class="article-section" id="adopt">
+            <h2>Adoption journey</h2>
+            <div class="flow-steps">
+              <div class="flow-step"><strong>1 Model</strong><p>YAML + task domains + owners.</p></div>
+              <div class="flow-step"><strong>2 Adapt</strong><p>Pair with platform for connectors.</p></div>
+              <div class="flow-step"><strong>3 Prove</strong><p>Contracts + chaos in sandbox.</p></div>
+              <div class="flow-step"><strong>4 Graduate</strong><p>Prod SLOs and automated guardrails.</p></div>
+            </div>
+          </section>
 
-              <defs>
-                <marker id="arrow3" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-                  <path d="M0,0 L8,4 L0,8 z" fill="#38bdf8" />
-                </marker>
-              </defs>
-            </svg>
-            <figcaption>Active/standby regions with CDC-based state sync and mirrored worker pools.</figcaption>
-          </figure>
-        </section>
-
-        <section class="article-section">
-          <h2>Data Plane</h2>
-          <p>
-            Execution workers run on Kubernetes with spot + on-demand mix. State
-            synchronization uses DynamoDB global tables plus MySQL read replicas
-            for reporting workloads. CDC pipelines ensure region-to-region
-            parity during migrations.
-          </p>
-        </section>
-
-        <section class="article-section">
-          <h2>Reliability Tactics</h2>
-          <ol>
-            <li>
-              <strong>Automated runbooks:</strong> Conductor events feed PagerDuty
-              and trigger remediation Lambdas.
-            </li>
-            <li>
-              <strong>Release safety:</strong> Jenkins pipelines run contract
-              tests for every workflow + backfill a shadow environment.
-            </li>
-            <li>
-              <strong>Blast-radius limits:</strong> Circuit breakers per task
-              domain halt only the affected integrations.
-            </li>
-          </ol>
-        </section>
-
-        <section class="article-section">
-          <h2>What Teams Get</h2>
-          <p>
-            Product teams plug into the platform through declarative workflow
-            packs. They gain:
-          </p>
-          <ul>
-            <li>Telemetry by default (Prometheus + Grafana dashboards).</li>
-            <li>Ability to simulate failures via chaos toggles.</li>
-            <li>
-              Shared libraries for building adapters in Java or Node.js without
-              reinventing plumbing.
-            </li>
-          </ul>
-        </section>
-
-        <section class="article-section">
-          <h2>Adoption Journey</h2>
-          <p>
-            We typically guide product teams through a four-stage adoption:
-          </p>
-          <ol>
-            <li>Model workflows as YAML + define task domains.</li>
-            <li>Pair with platform engineers to implement adapters.</li>
-            <li>Run contract tests + chaos drills in a sandbox.</li>
-            <li>Graduate to production with automated guardrails and SLO dashboards.</li>
-          </ol>
-        </section>
-
-        <div class="article-footer">
-          <p>Want a copy of the full architecture kit?</p>
-          <a href="../index.html#contact">Request the blueprint →</a>
-        </div>
-      </article>
+          <div class="related-posts">
+            <a href="agentic-platform-architecture.html"><span>AI</span>Agentic platform architecture</a>
+            <a href="durable-agent-orchestration.html"><span>Orchestration</span>Durable agent workflows</a>
+            <a href="saga-choreography-conductor.html"><span>Sagas</span>CDC choreography</a>
+          </div>
+        </article>
+        <aside class="article-toc">
+          <p>On this page</p>
+          <a href="#planes">Control vs data</a>
+          <a href="#regions">Multi-region</a>
+          <a href="#reliability">Reliability</a>
+          <a href="#adopt">Adoption</a>
+        </aside>
+      </div>
     </main>
   </body>
 </html>
-

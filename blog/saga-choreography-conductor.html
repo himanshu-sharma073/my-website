@@ -3,22 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Designing Saga Choreography for Workflow Engines</title>
+    <title>Designing Saga Choreography for Workflow Engines | Himanshu Sharma</title>
     <meta
       name="description"
-      content="How Himanshu Sharma applies saga choreography and CDC to keep Netflix Conductor workflows consistent across microservices."
+      content="How saga choreography and CDC keep Netflix Conductor workflows consistent across microservices without two-phase commit. By Himanshu Sharma."
     />
-    <link
-      rel="canonical"
-      href="https://www.himanshu-sharma.com/blog/saga-choreography-conductor"
-    />
-    <link rel="stylesheet" href="../styles.css" />
+    <meta name="author" content="Himanshu Sharma" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#030407" />
+    <link rel="canonical" href="https://www.himanshu-sharma.com/blog/saga-choreography-conductor.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Himanshu Sharma" />
+    <meta property="og:title" content="Designing Saga Choreography for Workflow Engines" />
+    <meta property="og:description" content="Saga choreography plus CDC for Netflix Conductor workflows—consistency without 2PC." />
+    <meta property="og:url" content="https://www.himanshu-sharma.com/blog/saga-choreography-conductor.html" />
+    <meta property="og:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <meta property="article:author" content="Himanshu Sharma" />
+    <meta property="article:section" content="Architecture" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Designing Saga Choreography for Workflow Engines" />
+    <meta name="twitter:description" content="Saga + CDC on Netflix Conductor for consistent microservices." />
+    <meta name="twitter:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="stylesheet" href="../styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Designing Saga Choreography for Workflow Engines",
+        "description": "How saga choreography and CDC keep Netflix Conductor workflows consistent across microservices.",
+        "author": { "@type": "Person", "name": "Himanshu Sharma", "url": "https://www.himanshu-sharma.com/" },
+        "publisher": { "@type": "Person", "name": "Himanshu Sharma" },
+        "mainEntityOfPage": "https://www.himanshu-sharma.com/blog/saga-choreography-conductor.html",
+        "image": "https://www.himanshu-sharma.com/assets/og-cover.svg",
+        "dateModified": "2026-08-18"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.himanshu-sharma.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blogs", "item": "https://www.himanshu-sharma.com/#blog" },
+          { "@type": "ListItem", "position": 3, "name": "Saga choreography", "item": "https://www.himanshu-sharma.com/blog/saga-choreography-conductor.html" }
+        ]
+      }
+    </script>
   </head>
   <body class="article-body">
     <div class="background-noise" aria-hidden="true"></div>
     <div class="background-grid" aria-hidden="true"></div>
-
     <header class="article-header-simple">
       <div class="identity">
         <div class="monogram">HS</div>
@@ -27,163 +62,223 @@
           <p class="title">Lead Platform Engineer</p>
         </div>
       </div>
-      <a class="contact-chip" href="../index.html">← Back to portfolio</a>
+      <a class="contact-chip" href="../index.html#blog">← All blogs</a>
     </header>
-
     <main class="article-shell">
-      <article class="article-content">
-        <p class="eyebrow">Microservices • Saga Pattern</p>
-        <h1>Designing Saga Choreography for Workflow Engines</h1>
-        <p class="article-summary">
-          Netflix Conductor orchestrates 30+ critical workflows inside our
-          Freshworks iPaaS. Here is how I pair saga choreography with Change
-          Data Capture (CDC) to keep microservices consistent without slowing
-          down developer velocity.
-        </p>
-        <div class="article-meta">
-          <span>Author: Himanshu Sharma</span>
-          <span>Last updated: Nov 2025</span>
-          <span>Reading time: 7 min</span>
-        </div>
-
-        <section class="article-section">
-          <h2>Why Saga + CDC?</h2>
-          <p>
-            Traditional two-phase commit approaches buckle under the latency
-            profile of omnichannel integrations. Saga choreography allows every
-            service to manage its own compensation logic, while CDC guarantees
-            that state changes are visible to Conductor in near real time.
+      <div class="article-layout">
+        <article class="article-content">
+          <p class="eyebrow">Microservices • Saga Pattern • CDC</p>
+          <h1>Designing Saga Choreography for Workflow Engines</h1>
+          <p class="article-summary">
+            Netflix Conductor orchestrates 30+ critical workflows inside our
+            Freshworks iPaaS. Pairing saga choreography with Change Data Capture
+            keeps microservices consistent without the latency tax of two-phase commit.
           </p>
-          <ul>
-            <li>Each service emits domain events to DynamoDB streams.</li>
-            <li>CDC relays events into Kafka topics dedicated per domain.</li>
-            <li>
-              Conductor tasks subscribe to those topics to decide progression or
-              rollback.
-            </li>
-          </ul>
-        </section>
-
-        <section class="article-section">
-          <h2>Reference Architecture</h2>
-          <p>
-            The diagram below illustrates how domain services, CDC pipelines,
-            and Conductor workers stay coordinated without introducing a single
-            point of failure.
-          </p>
-          <figure class="article-diagram">
-            <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
-              <rect width="800" height="360" rx="24" fill="#0f172a" />
-              <rect x="40" y="40" width="220" height="120" rx="12" fill="#1e293b" stroke="#38bdf8"/>
-              <text x="150" y="80" fill="#f8fafc" font-family="Inter" font-size="16" text-anchor="middle">Service A</text>
-              <text x="150" y="105" fill="#cbd5f5" font-size="12" text-anchor="middle">Emit Domain Events</text>
-              <rect x="300" y="40" width="220" height="120" rx="12" fill="#1e293b" stroke="#38bdf8"/>
-              <text x="410" y="80" fill="#f8fafc" font-family="Inter" font-size="16" text-anchor="middle">CDC Stream</text>
-              <text x="410" y="105" fill="#cbd5f5" font-size="12" text-anchor="middle">DynamoDB → Kafka</text>
-              <rect x="560" y="40" width="220" height="120" rx="12" fill="#1e293b" stroke="#38bdf8"/>
-              <text x="670" y="80" fill="#f8fafc" font-family="Inter" font-size="16" text-anchor="middle">Conductor Tasks</text>
-              <text x="670" y="105" fill="#cbd5f5" font-size="12" text-anchor="middle">Workflow Progress</text>
-              <line x1="260" y1="100" x2="300" y2="100" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)"/>
-              <line x1="520" y1="100" x2="560" y2="100" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)"/>
-              <rect x="150" y="200" width="500" height="120" rx="16" fill="#0b1220" stroke="#7dd3fc" stroke-dasharray="6 6"/>
-              <text x="400" y="235" fill="#f8fafc" font-size="16" text-anchor="middle">Saga Orchestration Context</text>
-              <text x="400" y="260" fill="#cbd5f5" font-size="12" text-anchor="middle">Metadata: task domain, retry policy, compensations</text>
-              <defs>
-                <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
-                  <path d="M0,0 L10,5 L0,10 z" fill="#38bdf8" />
-                </marker>
-              </defs>
-            </svg>
-            <figcaption>Domain events flow through CDC before Conductor advances the saga.</figcaption>
-          </figure>
-        </section>
-
-        <section class="article-section">
-          <h2>Workflow Contract</h2>
-          <p>
-            Every workflow definition includes an explicit
-            <strong>task domain contract</strong> so we can route execution to
-            language-specific workers (Java WebFlux vs. Node.js). Domains also
-            control isolation boundaries for throttling and alerting.
-          </p>
-          <div class="article-note">
-            Pro tip: expose the contract via metadata so UI and API consumers
-            can search workflows by domain (now supported upstream via my PR
-            #492).
+          <div class="article-meta">
+            <span>Author: Himanshu Sharma</span>
+            <span>Updated: Aug 2026</span>
+            <span>12 min read</span>
           </div>
-        </section>
+          <div class="stat-grid">
+            <div class="stat-pill"><strong>60%</strong><span>fewer reconcilers</span></div>
+            <div class="stat-pill"><strong>30+</strong><span>orchestrated workflows</span></div>
+            <div class="stat-pill"><strong>hours</strong><span>to onboard a new saga</span></div>
+          </div>
 
-        <section class="article-section">
-          <h2>Choreography Guardrails</h2>
-          <p>
-            Choreography can devolve into spaghetti if not governed. I enforce a
-            few non-negotiables:
-          </p>
-          <ol>
-            <li>
-              <strong>Idempotent tasks</strong> with deterministic compensation.
-            </li>
-            <li>
-              <strong>Time-boxed states</strong>: every task publishes heartbeat
-              events so Conductor can trigger retries or compensations.
-            </li>
-            <li>
-              <strong>Tracing parity</strong>: propagate OpenTelemetry baggage so
-              CDC and workflow logs can be correlated with Grafana dashboards.
-            </li>
-          </ol>
-        </section>
+          <section class="article-section" id="problem">
+            <h2>The distributed consistency problem</h2>
+            <p>
+              Omnichannel and iPaaS flows touch CRM, billing, messaging, and
+              identity. A ticket create might also provision a bot session, write
+              a knowledge-graph edge, and fan out an SMS. If any hop fails after
+              a commit, you get split-brain state: CRM thinks the ticket exists,
+              messaging does not.
+            </p>
+            <p>
+              Two-phase commit across these systems is a non-starter. Latency
+              budgets are sub-100&nbsp;ms at the edge, partners time out, and
+              lock duration across DynamoDB + Postgres + third-party APIs is
+              operationally unsafe.
+            </p>
+            <div class="callout warn">
+              Treat 2PC as a last resort. For integration platforms, sagas plus
+              an authoritative event log are the default consistency model.
+            </div>
+          </section>
 
-        <section class="article-section">
-          <h2>Implementation Checklist</h2>
-          <p>
-            If you are rolling this pattern into your own stack, I recommend
-            advancing through these gates:
-          </p>
-          <ul>
-            <li>
-              Align on the <strong>event taxonomy</strong>—what constitutes a
-              success, failure, timeout?
-            </li>
-            <li>
-              Codify <strong>retry semantics</strong> per domain and document the
-              compensating action.
-            </li>
-            <li>
-              Instrument <strong>end-to-end tracing</strong> before onboarding
-              any production workloads.
-            </li>
-          </ul>
-        </section>
+          <section class="article-section" id="why">
+            <h2>Why saga + CDC</h2>
+            <p>
+              Saga choreography lets each service own its forward action and its
+              compensation. CDC makes those state changes visible to Conductor
+              in near real time so the engine can decide progress, retry, or
+              rollback without polling databases.
+            </p>
+            <table class="compare-table">
+              <thead>
+                <tr>
+                  <th>Approach</th>
+                  <th>Strength</th>
+                  <th>Failure mode</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Orchestration (central commander)</td>
+                  <td>Easy to visualize</td>
+                  <td>Control plane becomes a bottleneck</td>
+                </tr>
+                <tr>
+                  <td>Choreography (events)</td>
+                  <td>Services stay autonomous</td>
+                  <td>Hard to debug without a contract</td>
+                </tr>
+                <tr>
+                  <td>Saga + CDC (chosen)</td>
+                  <td>Durable, inspectable, language-agnostic</td>
+                  <td>Requires event taxonomy discipline</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
 
-        <section class="article-section">
-          <h2>Metrics That Matter</h2>
-          <p>
-            We treat sagas like product experiences and monitor them with KPIs:
-          </p>
-          <ul>
-            <li>Median orchestration time per workflow.</li>
-            <li>Percentage of compensations triggered per domain.</li>
-            <li>CDC lag between source tables and Conductor consumption.</li>
-          </ul>
-        </section>
+          <section class="article-section" id="arch">
+            <h2>Reference architecture</h2>
+            <p>
+              Domain services write to their system of record. DynamoDB streams
+              (or Debezium on Postgres) feed Kafka. Conductor workers consume
+              domain topics and advance the workflow using task-domain routing.
+            </p>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="420" rx="24" fill="#0f172a"/>
+                <rect x="30" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="120" y="68" fill="#f8fafc" font-size="14" text-anchor="middle">CRM Service</text>
+                <text x="120" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Java / WebFlux</text>
+                <rect x="240" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="330" y="68" fill="#f8fafc" font-size="14" text-anchor="middle">Messaging</text>
+                <text x="330" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Node.js</text>
+                <rect x="450" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="540" y="68" fill="#f8fafc" font-size="14" text-anchor="middle">Billing</text>
+                <text x="540" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Java</text>
+                <rect x="660" y="30" width="170" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="745" y="68" fill="#f8fafc" font-size="14" text-anchor="middle">Graph API</text>
+                <text x="745" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Entity edges</text>
+                <rect x="140" y="160" width="580" height="80" rx="14" fill="#111827" stroke="#818cf8"/>
+                <text x="430" y="192" fill="#f8fafc" font-size="15" text-anchor="middle">CDC Fabric · DynamoDB Streams / Debezium → Kafka</text>
+                <text x="430" y="216" fill="#94a3b8" font-size="12" text-anchor="middle">ordered, at-least-once, partitioned by aggregate id</text>
+                <rect x="80" y="280" width="700" height="110" rx="16" fill="#0b1220" stroke="#34d399" stroke-dasharray="6 5"/>
+                <text x="430" y="318" fill="#f8fafc" font-size="15" text-anchor="middle">Conductor saga context</text>
+                <text x="430" y="344" fill="#94a3b8" font-size="12" text-anchor="middle">task domain · retries · compensations · workflow_summary index</text>
+                <text x="430" y="366" fill="#67e8f9" font-size="12" text-anchor="middle">Workers: Java domain A  ·  Node domain B  ·  Graph writers</text>
+                <line x1="120" y1="120" x2="250" y2="160" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="330" y1="120" x2="360" y2="160" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="540" y1="120" x2="500" y2="160" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="745" y1="120" x2="610" y2="160" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="430" y1="240" x2="430" y2="280" stroke="#34d399" stroke-width="3"/>
+              </svg>
+              <figcaption>Services emit CDC events; Conductor owns saga progress, not business writes.</figcaption>
+            </figure>
+          </section>
 
-        <section class="article-section">
-          <h2>Operational Outcomes</h2>
-          <p>
-            By combining CDC + saga we reduced reconciliation incidents by 60%,
-            and onboarding a new workflow now takes hours rather than days.
-            Developers work inside their preferred stack, while platform teams
-            maintain real-time visibility through Conductor’s summary index.
-          </p>
-        </section>
+          <section class="article-section" id="happy">
+            <h2>Happy path vs compensation path</h2>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="280" rx="24" fill="#0f172a"/>
+                <rect x="20" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="90" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">Start saga</text>
+                <rect x="190" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="260" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">Create ticket</text>
+                <rect x="360" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="430" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">Notify channel</text>
+                <rect x="530" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#34d399"/>
+                <text x="600" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">Index graph</text>
+                <rect x="700" y="40" width="140" height="64" rx="10" fill="#14532d" stroke="#34d399"/>
+                <text x="770" y="78" fill="#bbf7d0" font-size="13" text-anchor="middle">COMPLETE</text>
+                <line x1="160" y1="72" x2="190" y2="72" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="330" y1="72" x2="360" y2="72" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="500" y1="72" x2="530" y2="72" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="670" y1="72" x2="700" y2="72" stroke="#34d399" stroke-width="2"/>
+                <rect x="190" y="170" width="480" height="70" rx="12" fill="#3f1d1d" stroke="#fbbf24"/>
+                <text x="430" y="200" fill="#fde68a" font-size="13" text-anchor="middle">Compensation: reverse notify → tombstone ticket → emit failed event</text>
+                <text x="430" y="220" fill="#fcd34d" font-size="11" text-anchor="middle">Triggered when any downstream task times out or nacks</text>
+                <line x1="430" y1="104" x2="430" y2="170" stroke="#fbbf24" stroke-width="2" stroke-dasharray="5 4"/>
+              </svg>
+              <figcaption>Forward path is linear; failure always runs a documented reverse sequence.</figcaption>
+            </figure>
+            <div class="flow-steps">
+              <div class="flow-step"><strong>01 Intent</strong><p>API records command id + aggregate key.</p></div>
+              <div class="flow-step"><strong>02 Forward</strong><p>Each service commits locally, then emits CDC.</p></div>
+              <div class="flow-step"><strong>03 Decide</strong><p>Conductor matches event to next task or compensation.</p></div>
+              <div class="flow-step"><strong>04 Close</strong><p>Terminal status is indexed on <code>workflow_summary</code>.</p></div>
+            </div>
+          </section>
 
-        <div class="article-footer">
-          <p>Have thoughts on saga choreography? Let’s chat.</p>
-          <a href="../index.html#contact">Continue the conversation →</a>
-        </div>
-      </article>
+          <section class="article-section" id="contract">
+            <h2>Workflow contract</h2>
+            <p>
+              Every workflow declares a <strong>task domain contract</strong> so
+              execution routes to language-specific workers (Java WebFlux vs
+              Node.js). Domains also bound throttling, retries, and alerting.
+              Upstream PR
+              <a href="https://github.com/conductor-oss/conductor/pull/492" target="_blank" rel="noreferrer">#492</a>
+              added task domain to the summary index so operators can search
+              by domain.
+            </p>
+            <div class="article-note">
+              Expose the contract as metadata, not tribal knowledge. UI, APIs,
+              and on-call dashboards should all query the same fields.
+            </div>
+          </section>
+
+          <section class="article-section" id="guardrails">
+            <h2>Choreography guardrails</h2>
+            <ol>
+              <li><strong>Idempotent tasks</strong> with deterministic compensation keys.</li>
+              <li><strong>Time-boxed states</strong> with heartbeats so Conductor can retry or compensate.</li>
+              <li><strong>Tracing parity</strong> via OpenTelemetry baggage from CDC to Grafana.</li>
+              <li><strong>Poison-event quarantine</strong> after N retries, never silent drop.</li>
+              <li><strong>Idempotency tokens</strong> on public terminate/start APIs (see also PR
+                <a href="https://github.com/conductor-oss/conductor/pull/766" target="_blank" rel="noreferrer">#766</a>
+                for duplicate termination).</li>
+            </ol>
+          </section>
+
+          <section class="article-section" id="metrics">
+            <h2>Metrics that matter</h2>
+            <ul>
+              <li>Median and p95 orchestration time per workflow type.</li>
+              <li>Compensation rate per task domain (alert if it spikes).</li>
+              <li>CDC lag from source table to Conductor consumption.</li>
+              <li>Duplicate terminal notifications (should be ~0 after the terminate guard).</li>
+            </ul>
+            <p>
+              Combining CDC + saga cut reconciliation incidents by 60%, and a
+              new workflow now onboards in hours rather than days.
+            </p>
+          </section>
+
+          <div class="article-footer">
+            <p>Related reading</p>
+          </div>
+          <div class="related-posts">
+            <a href="durable-agent-orchestration.html"><span>Agents</span>Durable orchestration for AI agents</a>
+            <a href="ipaas-availability-blueprint.html"><span>iPaaS</span>High-availability Conductor blueprint</a>
+            <a href="agentic-platform-architecture.html"><span>Architecture</span>Agentic platform reference design</a>
+          </div>
+        </article>
+        <aside class="article-toc">
+          <p>On this page</p>
+          <a href="#problem">Consistency problem</a>
+          <a href="#why">Saga + CDC</a>
+          <a href="#arch">Architecture</a>
+          <a href="#happy">Happy vs compensate</a>
+          <a href="#contract">Contract</a>
+          <a href="#guardrails">Guardrails</a>
+          <a href="#metrics">Metrics</a>
+        </aside>
+      </div>
     </main>
   </body>
 </html>
-

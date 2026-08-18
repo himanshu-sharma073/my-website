@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reference Architecture for AI Agentic Platforms | Himanshu Sharma</title>
+    <meta
+      name="description"
+      content="Production architecture for AI agentic platforms: planner, tools, memory, knowledge graphs, and a durable orchestration control plane. By Himanshu Sharma."
+    />
+    <meta name="author" content="Himanshu Sharma" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#030407" />
+    <link rel="canonical" href="https://www.himanshu-sharma.com/blog/agentic-platform-architecture.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Himanshu Sharma" />
+    <meta property="og:title" content="Reference Architecture for AI Agentic Platforms" />
+    <meta property="og:description" content="Five-layer agentic platform: experience, runtime, Conductor, tools, and knowledge graphs." />
+    <meta property="og:url" content="https://www.himanshu-sharma.com/blog/agentic-platform-architecture.html" />
+    <meta property="og:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Reference Architecture for AI Agentic Platforms" />
+    <meta name="twitter:description" content="How to structure production AI agent platforms on a durable orchestrator." />
+    <meta name="twitter:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="stylesheet" href="../styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Reference Architecture for AI Agentic Platforms",
+        "description": "A production architecture for AI agentic platforms with planner, tools, memory, and durable orchestration.",
+        "author": { "@type": "Person", "name": "Himanshu Sharma", "url": "https://www.himanshu-sharma.com/" },
+        "mainEntityOfPage": "https://www.himanshu-sharma.com/blog/agentic-platform-architecture.html",
+        "image": "https://www.himanshu-sharma.com/assets/og-cover.svg",
+        "dateModified": "2026-08-18",
+        "keywords": ["AI Agents", "Agentic Architecture", "Netflix Conductor", "Knowledge Graphs"]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.himanshu-sharma.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blogs", "item": "https://www.himanshu-sharma.com/#blog" },
+          { "@type": "ListItem", "position": 3, "name": "Agentic platforms", "item": "https://www.himanshu-sharma.com/blog/agentic-platform-architecture.html" }
+        ]
+      }
+    </script>
+  </head>
+  <body class="article-body">
+    <div class="background-noise" aria-hidden="true"></div>
+    <div class="background-grid" aria-hidden="true"></div>
+    <header class="article-header-simple">
+      <div class="identity">
+        <div class="monogram">HS</div>
+        <div>
+          <p class="eyebrow">Himanshu Sharma</p>
+          <p class="title">Lead Platform Engineer</p>
+        </div>
+      </div>
+      <a class="contact-chip" href="../index.html#blog">← All blogs</a>
+    </header>
+    <main class="article-shell">
+      <div class="article-layout">
+        <article class="article-content">
+          <p class="eyebrow">AI • Architecture • Agentic systems</p>
+          <h1>Reference Architecture for AI Agentic Platforms</h1>
+          <p class="article-summary">
+            Agents are not chatbots with extra prompts. In production they are
+            long-running systems: they plan, call tools, write state, and must
+            survive retries, policy, and partial failure. This is the platform
+            shape I use when an iPaaS has to host agent workloads alongside
+            classic integrations.
+          </p>
+          <div class="article-meta">
+            <span>Author: Himanshu Sharma</span>
+            <span>Updated: Aug 2026</span>
+            <span>14 min read</span>
+          </div>
+
+          <section class="article-section" id="layers">
+            <h2>Five layers, not one mega-prompt</h2>
+            <p>
+              Collapse these layers into a single service and you will debug
+              “the LLM was weird” instead of a failed tool, a stale graph edge,
+              or a stuck workflow.
+            </p>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="420" rx="24" fill="#0f172a"/>
+                <rect x="40" y="24" width="780" height="58" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="430" y="50" fill="#e2e8f0" font-size="14" text-anchor="middle">Experience · product UIs · Teams bot · APIs</text>
+                <text x="430" y="68" fill="#94a3b8" font-size="11" text-anchor="middle">session, identity, channel</text>
+                <rect x="40" y="96" width="780" height="58" rx="10" fill="#1e293b" stroke="#818cf8"/>
+                <text x="430" y="122" fill="#e2e8f0" font-size="14" text-anchor="middle">Agent runtime · planner / critic / specialist agents</text>
+                <text x="430" y="140" fill="#94a3b8" font-size="11" text-anchor="middle">LLM gateway · prompt packs · guardrails</text>
+                <rect x="40" y="168" width="780" height="58" rx="10" fill="#1e293b" stroke="#34d399"/>
+                <text x="430" y="194" fill="#e2e8f0" font-size="14" text-anchor="middle">Durable orchestration · Netflix Conductor</text>
+                <text x="430" y="212" fill="#94a3b8" font-size="11" text-anchor="middle">sagas · retries · human-in-the-loop · timeouts</text>
+                <rect x="40" y="240" width="380" height="70" rx="10" fill="#111827" stroke="#fbbf24"/>
+                <text x="230" y="272" fill="#fde68a" font-size="13" text-anchor="middle">Tool / iPaaS adapters</text>
+                <text x="230" y="292" fill="#94a3b8" font-size="11" text-anchor="middle">CRM · messaging · billing · search</text>
+                <rect x="440" y="240" width="380" height="70" rx="10" fill="#111827" stroke="#fbbf24"/>
+                <text x="630" y="272" fill="#fde68a" font-size="13" text-anchor="middle">Knowledge graph + memory</text>
+                <text x="630" y="292" fill="#94a3b8" font-size="11" text-anchor="middle">entities · edges · episodic store</text>
+                <rect x="40" y="328" width="780" height="68" rx="10" fill="#0b1220" stroke="#67e8f9"/>
+                <text x="430" y="358" fill="#a5f3fc" font-size="14" text-anchor="middle">Platform services · IAM · audit · evals · cost meters · observability</text>
+                <text x="430" y="378" fill="#94a3b8" font-size="11" text-anchor="middle">every tool call is authenticated, traced, and budgeted</text>
+              </svg>
+              <figcaption>Agents sit above a durable orchestrator; tools and graphs sit below it.</figcaption>
+            </figure>
+            <div class="callout warn">
+              Never let the model own side effects. The model proposes; Conductor
+              (or equivalent) commits. That split is what makes rollbacks and
+              audits possible.
+            </div>
+          </section>
+
+          <section class="article-section" id="control">
+            <h2>Why orchestration belongs in the platform</h2>
+            <p>
+              LLM loops are great for local reasoning and terrible as a
+              transaction log. Tokens get lost, processes restart, and a
+              half-applied CRM update is still a half-applied CRM update.
+              Durable workflows give you:
+            </p>
+            <ul>
+              <li>Explicit steps with retries and compensation (same saga model as iPaaS).</li>
+              <li>Human approval as a first-class wait state, not a Slack hack.</li>
+              <li>Fan-out to specialist agents without nested prompt spaghetti.</li>
+              <li>A searchable execution history for evals and incidents.</li>
+            </ul>
+            <table class="compare-table">
+              <thead>
+                <tr><th>Concern</th><th>In the model loop</th><th>In Conductor / iPaaS</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Retry a failed ticket create</td><td>Hope the next completion agrees</td><td>Idempotent task + backoff</td></tr>
+                <tr><td>Pause for a manager</td><td>Custom poller</td><td>WAIT / human task</td></tr>
+                <tr><td>Audit who changed what</td><td>Prompt log</td><td>Workflow + CDC trail</td></tr>
+                <tr><td>Cost / latency SLO</td><td>Guess</td><td>Per-step meters</td></tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section class="article-section" id="memory">
+            <h2>Memory is a graph, not a blob</h2>
+            <p>
+              Working on knowledge graphs at Freshworks taught a simple rule:
+              agents retrieve better when entities and relationships are
+              modeled, not when every past chat is stuffed into context.
+            </p>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 250" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="250" rx="24" fill="#0f172a"/>
+                <circle cx="160" cy="125" r="48" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="160" y="130" fill="#e2e8f0" font-size="13" text-anchor="middle">Account</text>
+                <circle cx="430" cy="70" r="48" fill="#1e293b" stroke="#818cf8"/>
+                <text x="430" y="75" fill="#e2e8f0" font-size="13" text-anchor="middle">Ticket</text>
+                <circle cx="430" cy="180" r="48" fill="#1e293b" stroke="#34d399"/>
+                <text x="430" y="185" fill="#e2e8f0" font-size="13" text-anchor="middle">Agent run</text>
+                <circle cx="700" cy="125" r="48" fill="#1e293b" stroke="#fbbf24"/>
+                <text x="700" y="130" fill="#e2e8f0" font-size="13" text-anchor="middle">Policy</text>
+                <line x1="208" y1="125" x2="382" y2="80" stroke="#64748b" stroke-width="2"/>
+                <line x1="208" y1="125" x2="382" y2="170" stroke="#64748b" stroke-width="2"/>
+                <line x1="478" y1="80" x2="652" y2="125" stroke="#64748b" stroke-width="2"/>
+                <line x1="478" y1="180" x2="652" y2="125" stroke="#64748b" stroke-width="2"/>
+                <text x="300" y="88" fill="#94a3b8" font-size="10">owns</text>
+                <text x="290" y="168" fill="#94a3b8" font-size="10">started</text>
+                <text x="560" y="88" fill="#94a3b8" font-size="10">constrained by</text>
+              </svg>
+              <figcaption>Retrieve subgraphs (account → open tickets → last agent actions → policy) instead of raw logs.</figcaption>
+            </figure>
+          </section>
+
+          <section class="article-section" id="safety">
+            <h2>Safety and cost as platform features</h2>
+            <div class="flow-steps">
+              <div class="flow-step"><strong>Policy</strong><p>Tool allow-lists per agent role and tenant.</p></div>
+              <div class="flow-step"><strong>Budgets</strong><p>Token and $ caps abort the workflow, not the JVM.</p></div>
+              <div class="flow-step"><strong>Evals</strong><p>Replay golden traces on every prompt pack change.</p></div>
+              <div class="flow-step"><strong>Human</strong><p>High-risk tools always hit an approval task.</p></div>
+            </div>
+            <p>
+              This is the same operational culture as messaging SLOs: if you
+              cannot graph it, you cannot ship it. Agent platforms inherit
+              PagerDuty, canaries, and domain isolation from the iPaaS—not a
+              parallel stack.
+            </p>
+          </section>
+
+          <div class="related-posts">
+            <a href="durable-agent-orchestration.html"><span>Orchestration</span>Durable multi-agent workflows</a>
+            <a href="agent-tools-knowledge-graph.html"><span>Tools</span>iPaaS tools + knowledge graphs</a>
+            <a href="ipaas-availability-blueprint.html"><span>iPaaS</span>HA Conductor blueprint</a>
+          </div>
+        </article>
+        <aside class="article-toc">
+          <p>On this page</p>
+          <a href="#layers">Five layers</a>
+          <a href="#control">Why orchestrate</a>
+          <a href="#memory">Graph memory</a>
+          <a href="#safety">Safety &amp; cost</a>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>

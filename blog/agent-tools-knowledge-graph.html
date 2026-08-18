@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent Tools, iPaaS Adapters, and Knowledge Graphs | Himanshu Sharma</title>
+    <meta
+      name="description"
+      content="How AI agents should call enterprise tools through an iPaaS, with knowledge graphs as the retrieval and write-back layer. By Himanshu Sharma."
+    />
+    <meta name="author" content="Himanshu Sharma" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#030407" />
+    <link rel="canonical" href="https://www.himanshu-sharma.com/blog/agent-tools-knowledge-graph.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Himanshu Sharma" />
+    <meta property="og:title" content="Agent Tools, iPaaS Adapters, and Knowledge Graphs" />
+    <meta property="og:description" content="Governed iPaaS tools plus a knowledge graph for retrieve, act, and write-back." />
+    <meta property="og:url" content="https://www.himanshu-sharma.com/blog/agent-tools-knowledge-graph.html" />
+    <meta property="og:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Agent Tools, iPaaS Adapters, and Knowledge Graphs" />
+    <meta name="twitter:description" content="Ground agent tool-calls in iPaaS adapters and a knowledge graph." />
+    <meta name="twitter:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="stylesheet" href="../styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Agent Tools, iPaaS Adapters, and Knowledge Graphs",
+        "description": "How AI agents should call enterprise tools through an iPaaS with knowledge-graph grounding.",
+        "author": { "@type": "Person", "name": "Himanshu Sharma", "url": "https://www.himanshu-sharma.com/" },
+        "mainEntityOfPage": "https://www.himanshu-sharma.com/blog/agent-tools-knowledge-graph.html",
+        "image": "https://www.himanshu-sharma.com/assets/og-cover.svg",
+        "dateModified": "2026-08-18",
+        "keywords": ["Knowledge Graphs", "iPaaS", "AI Agents"]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.himanshu-sharma.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blogs", "item": "https://www.himanshu-sharma.com/#blog" },
+          { "@type": "ListItem", "position": 3, "name": "Agent tools and knowledge graphs", "item": "https://www.himanshu-sharma.com/blog/agent-tools-knowledge-graph.html" }
+        ]
+      }
+    </script>
+  </head>
+  <body class="article-body">
+    <div class="background-noise" aria-hidden="true"></div>
+    <div class="background-grid" aria-hidden="true"></div>
+    <header class="article-header-simple">
+      <div class="identity">
+        <div class="monogram">HS</div>
+        <div>
+          <p class="eyebrow">Himanshu Sharma</p>
+          <p class="title">Lead Platform Engineer</p>
+        </div>
+      </div>
+      <a class="contact-chip" href="../index.html#blog">← All blogs</a>
+    </header>
+    <main class="article-shell">
+      <div class="article-layout">
+        <article class="article-content">
+          <p class="eyebrow">AI Agents • iPaaS • Knowledge Graphs</p>
+          <h1>Agent Tools, iPaaS Adapters, and Knowledge Graphs</h1>
+          <p class="article-summary">
+            The fastest way to make agents dangerous is to give the model raw
+            product APIs. The fastest way to make them useful is to wrap those
+            APIs as governed iPaaS tools and ground every call in a knowledge
+            graph of entities and policies.
+          </p>
+          <div class="article-meta">
+            <span>Author: Himanshu Sharma</span>
+            <span>Updated: Aug 2026</span>
+            <span>11 min read</span>
+          </div>
+
+          <section class="article-section" id="why">
+            <h2>Why tools should be iPaaS adapters</h2>
+            <p>
+              Freshworks already has messaging, CRM, and orchestration
+              adapters. Agents should not grow a second integration estate.
+              Each tool is a versioned adapter: auth, retries, schemas, and
+              SLOs already exist.
+            </p>
+            <ul>
+              <li>One IAM story for humans, automations, and agents.</li>
+              <li>One CDC trail when an agent mutates a ticket or account.</li>
+              <li>One place to turn a tool off without redeploying prompts.</li>
+            </ul>
+          </section>
+
+          <section class="article-section" id="loop">
+            <h2>Retrieve → decide → act → write-back</h2>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="300" rx="24" fill="#0f172a"/>
+                <rect x="30" y="40" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="120" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">1. Retrieve</text>
+                <text x="120" y="100" fill="#94a3b8" font-size="11" text-anchor="middle">KG subgraph + ACL</text>
+                <rect x="240" y="40" width="180" height="90" rx="12" fill="#1e293b" stroke="#818cf8"/>
+                <text x="330" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">2. Decide</text>
+                <text x="330" y="100" fill="#94a3b8" font-size="11" text-anchor="middle">Planner worker</text>
+                <rect x="450" y="40" width="180" height="90" rx="12" fill="#1e293b" stroke="#34d399"/>
+                <text x="540" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">3. Act</text>
+                <text x="540" y="100" fill="#94a3b8" font-size="11" text-anchor="middle">iPaaS tool task</text>
+                <rect x="660" y="40" width="170" height="90" rx="12" fill="#1e293b" stroke="#fbbf24"/>
+                <text x="745" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">4. Write-back</text>
+                <text x="745" y="100" fill="#94a3b8" font-size="11" text-anchor="middle">CDC → graph edges</text>
+                <rect x="120" y="180" width="620" height="80" rx="14" fill="#111827" stroke="#67e8f9"/>
+                <text x="430" y="214" fill="#a5f3fc" font-size="13" text-anchor="middle">Policy engine: tenant, residency, PII tags, tool allow-list</text>
+                <text x="430" y="236" fill="#94a3b8" font-size="11" text-anchor="middle">blocks step 3 if the retrieved subgraph says the action is out of policy</text>
+                <line x1="210" y1="85" x2="240" y2="85" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="420" y1="85" x2="450" y2="85" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="630" y1="85" x2="660" y2="85" stroke="#38bdf8" stroke-width="2"/>
+              </svg>
+              <figcaption>The graph is both the read model for planning and the write model after tools run.</figcaption>
+            </figure>
+          </section>
+
+          <section class="article-section" id="kg">
+            <h2>What the knowledge graph actually stores</h2>
+            <p>
+              Knowledge graph work on the platform team is about modeling
+              relationships between entities and business concepts so agents
+              (and humans) get contextual discovery across products.
+            </p>
+            <table class="compare-table">
+              <thead>
+                <tr><th>Node / edge</th><th>Example</th><th>Agent use</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Account —owns→ Ticket</td><td>Acme → INC-4421</td><td>Scope retrieval</td></tr>
+                <tr><td>Ticket —mentioned_in→ Thread</td><td>WhatsApp lane</td><td>Channel-aware replies</td></tr>
+                <tr><td>AgentRun —used_tool→ Adapter</td><td>create_ticket</td><td>Evals / replay</td></tr>
+                <tr><td>Policy —constrains→ Tool</td><td>EU residency</td><td>Block illegal calls</td></tr>
+                <tr><td>Entity —similar_to→ Entity</td><td>duplicate contacts</td><td>Dedupe before write</td></tr>
+              </tbody>
+            </table>
+            <div class="callout">
+              Graph writes go through CDC the same way CRM writes do. If the
+              agent’s tool succeeds but the edge never appears, the saga is not
+              complete.
+            </div>
+          </section>
+
+          <section class="article-section" id="schema">
+            <h2>Tool schema, not free-form JSON</h2>
+            <p>
+              Publish a strict JSON schema per tool. The planner may only emit
+              that shape. Workers validate before hitting the product API.
+              Version adapters independently of prompt packs so a Teams bot
+              change does not require a model redeploy.
+            </p>
+            <div class="flow-steps">
+              <div class="flow-step"><strong>Catalog</strong><p>Tool name, domain, risk class, schema.</p></div>
+              <div class="flow-step"><strong>Bind</strong><p>IAM role + tenant + residency.</p></div>
+              <div class="flow-step"><strong>Execute</strong><p>Conductor task, idempotency key.</p></div>
+              <div class="flow-step"><strong>Index</strong><p>CDC upserts graph edges.</p></div>
+            </div>
+          </section>
+
+          <div class="related-posts">
+            <a href="agentic-platform-architecture.html"><span>Architecture</span>Agentic platform layers</a>
+            <a href="durable-agent-orchestration.html"><span>Conductor</span>Durable agent runs</a>
+            <a href="omnichannel-scaling-guide.html"><span>Channels</span>Where agent replies land</a>
+          </div>
+        </article>
+        <aside class="article-toc">
+          <p>On this page</p>
+          <a href="#why">iPaaS tools</a>
+          <a href="#loop">Retrieve-act loop</a>
+          <a href="#kg">Graph model</a>
+          <a href="#schema">Tool schema</a>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>

@@ -3,22 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scaling Omnichannel Services to 100K Daily Interactions</title>
+    <title>Scaling Omnichannel Services to 100K Daily Interactions | Himanshu Sharma</title>
     <meta
       name="description"
-      content="Playbook for scaling omnichannel messaging surfaces with Spring WebFlux, back-pressure controls, and observability guardrails."
+      content="Playbook for scaling omnichannel messaging with WebFlux, back-pressure, lane isolation, and SLO guardrails. By Himanshu Sharma."
     />
-    <link
-      rel="canonical"
-      href="https://www.himanshu-sharma.com/blog/omnichannel-scaling-guide"
-    />
-    <link rel="stylesheet" href="../styles.css" />
+    <meta name="author" content="Himanshu Sharma" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#030407" />
+    <link rel="canonical" href="https://www.himanshu-sharma.com/blog/omnichannel-scaling-guide.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Himanshu Sharma" />
+    <meta property="og:title" content="Scaling Omnichannel Services to 100K Daily Interactions" />
+    <meta property="og:description" content="Lane isolation, back-pressure, and SLO dashboards for messaging at 100K+ daily interactions." />
+    <meta property="og:url" content="https://www.himanshu-sharma.com/blog/omnichannel-scaling-guide.html" />
+    <meta property="og:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
+    <meta property="article:author" content="Himanshu Sharma" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Scaling Omnichannel Services to 100K Daily Interactions" />
+    <meta name="twitter:description" content="WebFlux, lanes, and SLOs for high-volume messaging." />
+    <meta name="twitter:image" content="https://www.himanshu-sharma.com/assets/og-cover.svg" />
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="stylesheet" href="../styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Scaling Omnichannel Services to 100K Daily Interactions",
+        "description": "Playbook for scaling omnichannel messaging with WebFlux, back-pressure, and SLO guardrails.",
+        "author": { "@type": "Person", "name": "Himanshu Sharma", "url": "https://www.himanshu-sharma.com/" },
+        "mainEntityOfPage": "https://www.himanshu-sharma.com/blog/omnichannel-scaling-guide.html",
+        "image": "https://www.himanshu-sharma.com/assets/og-cover.svg",
+        "dateModified": "2026-08-18"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.himanshu-sharma.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blogs", "item": "https://www.himanshu-sharma.com/#blog" },
+          { "@type": "ListItem", "position": 3, "name": "Omnichannel scaling", "item": "https://www.himanshu-sharma.com/blog/omnichannel-scaling-guide.html" }
+        ]
+      }
+    </script>
   </head>
   <body class="article-body">
     <div class="background-noise" aria-hidden="true"></div>
     <div class="background-grid" aria-hidden="true"></div>
-
     <header class="article-header-simple">
       <div class="identity">
         <div class="monogram">HS</div>
@@ -27,154 +60,149 @@
           <p class="title">Lead Platform Engineer</p>
         </div>
       </div>
-      <a class="contact-chip" href="../index.html">← Back to portfolio</a>
+      <a class="contact-chip" href="../index.html#blog">← All blogs</a>
     </header>
-
     <main class="article-shell">
-      <article class="article-content">
-        <p class="eyebrow">Scaling • Observability</p>
-        <h1>Scaling Omnichannel Services to 100K Daily Interactions</h1>
-        <p class="article-summary">
-          Messaging is unforgiving—latency spikes translate directly to revenue
-          hits. This is the reference architecture I used at Freshworks to keep
-          WhatsApp, email, SMS, and voice channels reliable as traffic tripled.
-        </p>
-        <div class="article-meta">
-          <span>Author: Himanshu Sharma</span>
-          <span>Last updated: Nov 2025</span>
-          <span>Reading time: 6 min</span>
-        </div>
-
-        <section class="article-section">
-          <h2>Layered Capacity Planning</h2>
-          <p>
-            Instead of planning capacity per microservice, we scope by
-            <em>conversation lane</em> (SMS, WhatsApp, voice). Each lane owns:
+      <div class="article-layout">
+        <article class="article-content">
+          <p class="eyebrow">Scaling • Observability • Messaging</p>
+          <h1>Scaling Omnichannel Services to 100K Daily Interactions</h1>
+          <p class="article-summary">
+            Latency spikes in messaging become revenue hits. This is the
+            architecture we used at Freshworks to keep WhatsApp, email, SMS,
+            voice, and Teams reliable as traffic tripled.
           </p>
-          <ul>
-            <li>An autoscaled WebFlux ingress tier with bounded connection pool.</li>
-            <li>
-              Dedicated Kafka partitions tuned for the lane’s throughput
-              distribution.
-            </li>
-            <li>
-              Failover templates that reroute traffic to a warm standby region.
-            </li>
-          </ul>
-        </section>
-
-        <section class="article-section">
-          <h2>Channel Architecture Map</h2>
-          <p>
-            Each conversation lane has an ingress tier, a buffering tier, and a
-            delivery tier. The following diagram captures the core flow.
-          </p>
-          <figure class="article-diagram">
-            <svg viewBox="0 0 840 360" xmlns="http://www.w3.org/2000/svg">
-              <rect width="840" height="360" rx="24" fill="#0f172a" />
-              <rect x="50" y="60" width="200" height="100" rx="12" fill="#1f2937" stroke="#38bdf8"/>
-              <text x="150" y="105" fill="#f8fafc" font-size="16" text-anchor="middle">Ingress</text>
-              <text x="150" y="130" fill="#cbd5f5" font-size="12" text-anchor="middle">WebFlux Gateway</text>
-              <rect x="320" y="60" width="200" height="100" rx="12" fill="#1f2937" stroke="#38bdf8"/>
-              <text x="420" y="105" fill="#f8fafc" font-size="16" text-anchor="middle">Buffering</text>
-              <text x="420" y="130" fill="#cbd5f5" font-size="12" text-anchor="middle">Kafka + Redis</text>
-              <rect x="590" y="60" width="200" height="100" rx="12" fill="#1f2937" stroke="#38bdf8"/>
-              <text x="690" y="105" fill="#f8fafc" font-size="16" text-anchor="middle">Delivery</text>
-              <text x="690" y="130" fill="#cbd5f5" font-size="12" text-anchor="middle">Channel Adapters</text>
-              <line x1="250" y1="110" x2="320" y2="110" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow2)"/>
-              <line x1="520" y1="110" x2="590" y2="110" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow2)"/>
-              <rect x="120" y="200" width="600" height="110" rx="16" fill="#111827" stroke="#7dd3fc" stroke-dasharray="5 6"/>
-              <text x="420" y="235" fill="#f8fafc" font-size="16" text-anchor="middle">Observability &amp; Control Plane</text>
-              <text x="420" y="260" fill="#cbd5f5" font-size="12" text-anchor="middle">Grafana dashboards • Jenkins canary • PagerDuty</text>
-              <defs>
-                <marker id="arrow2" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
-                  <path d="M0,0 L10,5 L0,10 z" fill="#38bdf8" />
-                </marker>
-              </defs>
-            </svg>
-            <figcaption>Each lane owns ingress, buffering, and delivery tiers backed by a shared control plane.</figcaption>
-          </figure>
-        </section>
-
-        <section class="article-section">
-          <h2>Back-pressure Everywhere</h2>
-          <p>
-            Spring WebFlux gives us a reactive backbone, but the magic happens
-            when we propagate demand signals end-to-end:
-          </p>
-          <ol>
-            <li>
-              Apply <strong>rate-aware batching</strong> before calling third-party
-              APIs.
-            </li>
-            <li>
-              Emit <strong>custom Micrometer meters</strong> for queue depth and
-              consumer lag, surfacing them in Grafana.
-            </li>
-            <li>
-              Wire <strong>Jenkins canary jobs</strong> to watch these meters
-              during deploy and auto-roll back when SLOs degrade.
-            </li>
-          </ol>
-        </section>
-
-        <section class="article-section">
-          <h2>Design Tenets</h2>
-          <p>We describe every channel lane using four tenets:</p>
-          <ul>
-            <li><strong>Isolation:</strong> noisy neighbors can’t impact other lanes.</li>
-            <li><strong>Observability:</strong> SLOs and budget alerts exist before GA.</li>
-            <li><strong>Automatability:</strong> deployments + rollbacks require a single Jenkins job.</li>
-            <li><strong>Compliance:</strong> data residency settings per lane (EU-only, US-only).</li>
-          </ul>
-        </section>
-
-        <section class="article-section">
-          <h2>Runbook Snapshot</h2>
-          <p>
-            Our runbook includes pre-built flows for:
-          </p>
-          <ol>
-            <li>Fast-draining a Kafka partition when consumer lag exceeds thresholds.</li>
-            <li>Switching traffic to a warm region and rehydrating Redis caches.</li>
-            <li>Automated post-mortem collection (logs, traces, dashboards).</li>
-          </ol>
-        </section>
-
-        <section class="article-section">
-          <h2>Observability Guardrails</h2>
-          <p>
-            Engineering teams get a single Grafana dashboard with four tiles:
-            ingestion latency, downstream success, queue depth, and error budget
-            burn. Every tile maps to PagerDuty policies so on-call responders
-            have consistent triggers.
-          </p>
-          <div class="article-note">
-            Bonus: pair the dashboard with synthetic monitors to replay common
-            journeys (OTP, ticket assignments) every minute.
+          <div class="article-meta">
+            <span>Author: Himanshu Sharma</span>
+            <span>Updated: Aug 2026</span>
+            <span>11 min read</span>
           </div>
-        </section>
+          <div class="stat-grid">
+            <div class="stat-pill"><strong>100K+</strong><span>daily interactions</span></div>
+            <div class="stat-pill"><strong>95 ms</strong><span>p99 at peak</span></div>
+            <div class="stat-pill"><strong>20%</strong><span>engagement lift</span></div>
+            <div class="stat-pill"><strong>&lt;3 min</strong><span>time to detect</span></div>
+          </div>
 
-        <section class="article-section">
-          <h2>Results</h2>
-          <p>
-            The platform now handles 100K+ daily interactions with sub-100 ms
-            latency and a 20% lift in engagement. Teams deploy 2–3 times per day
-            because the guardrails make regressions obvious.
-          </p>
-          <ul>
-            <li>p99 response time: 95 ms during peak events.</li>
-            <li>Error budget burn reduced by 35% quarter over quarter.</li>
-            <li>Time-to-detect (TTD) for channel regressions under 3 minutes.</li>
-          </ul>
-        </section>
+          <section class="article-section" id="lanes">
+            <h2>Plan capacity by conversation lane</h2>
+            <p>
+              Do not size “the messaging service.” Size <em>lanes</em>: SMS,
+              WhatsApp, email, voice, Teams. Each lane has a different partner
+              SLA, burst shape, and compliance boundary. Mixing them on one
+              Kafka topic creates noisy-neighbor outages.
+            </p>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 360" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="360" rx="24" fill="#0f172a"/>
+                <text x="430" y="36" fill="#94a3b8" font-size="12" text-anchor="middle">Clients · products · bots</text>
+                <rect x="40" y="55" width="780" height="50" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="430" y="86" fill="#e2e8f0" font-size="14" text-anchor="middle">WebFlux ingress · per-lane connection pools</text>
+                <rect x="40" y="130" width="180" height="90" rx="12" fill="#111827" stroke="#818cf8"/>
+                <text x="130" y="168" fill="#c4b5fd" font-size="13" text-anchor="middle">SMS lane</text>
+                <text x="130" y="190" fill="#94a3b8" font-size="11" text-anchor="middle">Kafka t.sms</text>
+                <rect x="240" y="130" width="180" height="90" rx="12" fill="#111827" stroke="#818cf8"/>
+                <text x="330" y="168" fill="#c4b5fd" font-size="13" text-anchor="middle">WhatsApp</text>
+                <text x="330" y="190" fill="#94a3b8" font-size="11" text-anchor="middle">Kafka t.wa</text>
+                <rect x="440" y="130" width="180" height="90" rx="12" fill="#111827" stroke="#818cf8"/>
+                <text x="530" y="168" fill="#c4b5fd" font-size="13" text-anchor="middle">Email / Voice</text>
+                <text x="530" y="190" fill="#94a3b8" font-size="11" text-anchor="middle">Kafka t.mail</text>
+                <rect x="640" y="130" width="180" height="90" rx="12" fill="#111827" stroke="#818cf8"/>
+                <text x="730" y="168" fill="#c4b5fd" font-size="13" text-anchor="middle">Teams bot</text>
+                <text x="730" y="190" fill="#94a3b8" font-size="11" text-anchor="middle">Kafka t.teams</text>
+                <rect x="140" y="250" width="580" height="80" rx="14" fill="#0b1220" stroke="#34d399"/>
+                <text x="430" y="284" fill="#bbf7d0" font-size="14" text-anchor="middle">Delivery adapters + partner circuit breakers</text>
+                <text x="430" y="306" fill="#86efac" font-size="11" text-anchor="middle">rate-aware batching · regional failover · residency tags</text>
+                <line x1="430" y1="105" x2="430" y2="130" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="130" y1="220" x2="280" y2="250" stroke="#34d399" stroke-width="1.5"/>
+                <line x1="330" y1="220" x2="380" y2="250" stroke="#34d399" stroke-width="1.5"/>
+                <line x1="530" y1="220" x2="480" y2="250" stroke="#34d399" stroke-width="1.5"/>
+                <line x1="730" y1="220" x2="580" y2="250" stroke="#34d399" stroke-width="1.5"/>
+              </svg>
+              <figcaption>Shared ingress, isolated lanes, shared delivery adapters with per-partner breakers.</figcaption>
+            </figure>
+          </section>
 
-        <div class="article-footer">
-          <p>Need help scaling your messaging surface?</p>
-          <a href="../index.html#contact">Book a chat →</a>
-        </div>
-      </article>
+          <section class="article-section" id="backpressure">
+            <h2>Back-pressure end to end</h2>
+            <p>
+              Spring WebFlux is necessary but not sufficient. Demand must
+              propagate from partner APIs back to ingress.
+            </p>
+            <figure class="article-diagram">
+              <svg viewBox="0 0 860 200" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="200" rx="24" fill="#0f172a"/>
+                <rect x="20" y="60" width="150" height="70" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="95" y="102" fill="#e2e8f0" font-size="13" text-anchor="middle">Ingress</text>
+                <rect x="200" y="60" width="150" height="70" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="275" y="102" fill="#e2e8f0" font-size="13" text-anchor="middle">Buffer</text>
+                <rect x="380" y="60" width="150" height="70" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <text x="455" y="102" fill="#e2e8f0" font-size="13" text-anchor="middle">Worker</text>
+                <rect x="560" y="60" width="150" height="70" rx="10" fill="#1e293b" stroke="#fbbf24"/>
+                <text x="635" y="102" fill="#fde68a" font-size="13" text-anchor="middle">Partner API</text>
+                <rect x="740" y="60" width="100" height="70" rx="10" fill="#14532d" stroke="#34d399"/>
+                <text x="790" y="102" fill="#bbf7d0" font-size="12" text-anchor="middle">Ack</text>
+                <text x="430" y="170" fill="#67e8f9" font-size="12" text-anchor="middle">← lag meters · RPS caps · canary rollback signals travel left</text>
+                <line x1="170" y1="95" x2="200" y2="95" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="350" y1="95" x2="380" y2="95" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="530" y1="95" x2="560" y2="95" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="710" y1="95" x2="740" y2="95" stroke="#34d399" stroke-width="2"/>
+              </svg>
+              <figcaption>If the partner slows down, workers apply rate-aware batching and ingress sheds load.</figcaption>
+            </figure>
+            <ol>
+              <li>Rate-aware batching before third-party calls.</li>
+              <li>Micrometer meters for queue depth and consumer lag in Grafana.</li>
+              <li>Jenkins canaries watch those meters and auto-roll back SLO burns.</li>
+            </ol>
+          </section>
+
+          <section class="article-section" id="slo">
+            <h2>SLO dashboard contract</h2>
+            <p>Every lane ships with four tiles before GA:</p>
+            <table class="compare-table">
+              <thead>
+                <tr><th>Tile</th><th>Signal</th><th>Page if</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Ingestion latency</td><td>p99 gateway → Kafka</td><td>&gt; 150 ms for 5 min</td></tr>
+                <tr><td>Downstream success</td><td>partner 2xx ratio</td><td>&lt; 99% for 10 min</td></tr>
+                <tr><td>Queue depth</td><td>consumer lag</td><td>&gt; 2× hourly peak</td></tr>
+                <tr><td>Error budget</td><td>burn rate</td><td>&gt; 2× remaining budget</td></tr>
+              </tbody>
+            </table>
+            <div class="callout">
+              Pair dashboards with synthetics that replay OTP, ticket assign,
+              and Teams reply every minute. Humans should not be the first
+              detector.
+            </div>
+          </section>
+
+          <section class="article-section" id="tenets">
+            <h2>Design tenets and runbooks</h2>
+            <ul>
+              <li><strong>Isolation:</strong> noisy neighbors cannot starve other lanes.</li>
+              <li><strong>Observability:</strong> SLOs exist before GA, not after the first outage.</li>
+              <li><strong>Automatability:</strong> deploy and rollback via one Jenkins job.</li>
+              <li><strong>Compliance:</strong> residency tags (EU/US) travel with the payload.</li>
+            </ul>
+            <p>Pre-built runbooks: drain a lagging partition, fail over to a warm region and rehydrate Redis, collect logs/traces for the post-mortem automatically.</p>
+          </section>
+
+          <div class="related-posts">
+            <a href="ipaas-availability-blueprint.html"><span>iPaaS</span>HA integration platform</a>
+            <a href="saga-choreography-conductor.html"><span>Sagas</span>Choreography + CDC</a>
+            <a href="durable-agent-orchestration.html"><span>Agents</span>Agent steps on the same bus</a>
+          </div>
+        </article>
+        <aside class="article-toc">
+          <p>On this page</p>
+          <a href="#lanes">Conversation lanes</a>
+          <a href="#backpressure">Back-pressure</a>
+          <a href="#slo">SLO contract</a>
+          <a href="#tenets">Tenets</a>
+        </aside>
+      </div>
     </main>
   </body>
 </html>
-
