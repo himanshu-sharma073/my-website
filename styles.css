@@ -685,6 +685,239 @@ section {
   text-align: center;
 }
 
+/* Live architecture diagram animations */
+.diagram-live {
+  position: relative;
+  overflow: hidden;
+}
+
+.diagram-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(56, 189, 248, 0.06),
+    transparent 55%
+  );
+  pointer-events: none;
+}
+
+.diagram-live svg {
+  display: block;
+}
+
+/* Auto-animate connector lines when class not set explicitly */
+.diagram-live svg line {
+  stroke-dasharray: 10 8;
+  animation: diagram-flow 1.55s linear infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live svg rect[stroke]:not([width="860"]):not([width="840"]) {
+  animation: diagram-pulse 2.8s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live svg circle[stroke] {
+  animation: diagram-pulse 2.6s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live.is-active svg line,
+.diagram-live.is-active svg rect[stroke]:not([width="860"]):not([width="840"]),
+.diagram-live.is-active svg circle[stroke],
+.diagram-live.is-active .flow-line,
+.diagram-live.is-active .flow-line-slow,
+.diagram-live.is-active .node-pulse,
+.diagram-live.is-active .node-pulse-green,
+.diagram-live.is-active .node-pulse-purple,
+.diagram-live.is-active .scan-beam {
+  animation-play-state: running;
+}
+
+.diagram-live svg rect[stroke]:nth-of-type(2) {
+  animation-delay: 0.35s;
+}
+
+.diagram-live svg rect[stroke]:nth-of-type(3) {
+  animation-delay: 0.7s;
+}
+
+.diagram-live svg rect[stroke]:nth-of-type(4) {
+  animation-delay: 1.05s;
+}
+
+@keyframes diagram-flow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+@keyframes diagram-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.2));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.55));
+  }
+}
+
+@keyframes diagram-pulse-green {
+  0%,
+  100% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 2px rgba(52, 211, 153, 0.2));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.5));
+  }
+}
+
+@keyframes diagram-pulse-purple {
+  0%,
+  100% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 2px rgba(129, 140, 248, 0.2));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(129, 140, 248, 0.5));
+  }
+}
+
+@keyframes diagram-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(420%);
+    opacity: 0;
+  }
+}
+
+.diagram-live .flow-line {
+  stroke-dasharray: 10 8;
+  animation: diagram-flow 1.4s linear infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live .flow-line-slow {
+  stroke-dasharray: 12 10;
+  animation: diagram-flow 2.2s linear infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live .flow-line-reverse {
+  animation-direction: reverse;
+}
+
+.diagram-live .node-pulse {
+  animation: diagram-pulse 2.4s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live .node-pulse-green {
+  animation: diagram-pulse-green 2.6s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live .node-pulse-purple {
+  animation: diagram-pulse-purple 2.8s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live .node-pulse-delay-1 {
+  animation-delay: 0.4s;
+}
+
+.diagram-live .node-pulse-delay-2 {
+  animation-delay: 0.8s;
+}
+
+.diagram-live .node-pulse-delay-3 {
+  animation-delay: 1.2s;
+}
+
+.diagram-live .node-pulse-delay-4 {
+  animation-delay: 1.6s;
+}
+
+.diagram-live .scan-beam {
+  animation: diagram-scan 4s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.diagram-live .particle {
+  filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.9));
+}
+
+.diagram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  justify-content: center;
+  margin-top: 0.85rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.diagram-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.diagram-legend i {
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.diagram-legend i.flow {
+  background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+  animation: diagram-flow 1.4s linear infinite;
+  background-size: 200% 100%;
+}
+
+.diagram-legend i.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  animation: diagram-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diagram-live svg line,
+  .diagram-live svg rect[stroke],
+  .diagram-live svg circle[stroke],
+  .diagram-live .flow-line,
+  .diagram-live .flow-line-slow,
+  .diagram-live .node-pulse,
+  .diagram-live .node-pulse-green,
+  .diagram-live .node-pulse-purple,
+  .diagram-live .scan-beam,
+  .diagram-legend i.flow,
+  .diagram-legend i.pulse {
+    animation: none;
+  }
+
+  .diagram-live svg animateMotion,
+  .diagram-live svg animate {
+    display: none;
+  }
+}
+
 .article-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 240px;

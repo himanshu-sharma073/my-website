@@ -149,62 +149,130 @@
               (or Debezium on Postgres) feed Kafka. Conductor workers consume
               domain topics and advance the workflow using task-domain routing.
             </p>
-            <figure class="article-diagram">
+            <figure class="article-diagram diagram-live">
               <svg viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="scanGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="transparent"/>
+                    <stop offset="50%" stop-color="#38bdf8"/>
+                    <stop offset="100%" stop-color="transparent"/>
+                  </linearGradient>
+                  <clipPath id="saga-scan"><rect x="0" y="0" width="860" height="420" rx="24"/></clipPath>
+                  <path id="saga-p1" d="M120,120 L280,160" fill="none"/>
+                  <path id="saga-p2" d="M330,120 L380,160" fill="none"/>
+                  <path id="saga-p3" d="M430,240 L430,280" fill="none"/>
+                </defs>
                 <rect width="860" height="420" rx="24" fill="#0f172a"/>
-                <rect x="30" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <g clip-path="url(#saga-scan)">
+                  <rect class="scan-beam" x="0" y="0" width="860" height="60" fill="url(#scanGrad)" opacity="0.5"/>
+                </g>
+                <rect class="node-pulse" x="30" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
                 <text x="120" y="68" fill="#f8fafc" font-size="14" text-anchor="middle">CRM Service</text>
                 <text x="120" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Java / WebFlux</text>
-                <rect x="240" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <rect class="node-pulse node-pulse-delay-1" x="240" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
                 <text x="330" y="68" fill="#f8fafc" font-size="14" text-anchor="middle">Messaging</text>
                 <text x="330" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Node.js</text>
-                <rect x="450" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <rect class="node-pulse node-pulse-delay-2" x="450" y="30" width="180" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
                 <text x="540" y="68" fill="#f8fafc" font-size="14" text-anchor="middle">Billing</text>
                 <text x="540" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Java</text>
-                <rect x="660" y="30" width="170" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
+                <rect class="node-pulse node-pulse-delay-3" x="660" y="30" width="170" height="90" rx="12" fill="#1e293b" stroke="#38bdf8"/>
                 <text x="745" y="68" fill="#f8fafc" font-size="14" text-anchor="middle">Graph API</text>
                 <text x="745" y="90" fill="#94a3b8" font-size="11" text-anchor="middle">Entity edges</text>
-                <rect x="140" y="160" width="580" height="80" rx="14" fill="#111827" stroke="#818cf8"/>
+                <rect class="node-pulse-purple" x="140" y="160" width="580" height="80" rx="14" fill="#111827" stroke="#818cf8"/>
                 <text x="430" y="192" fill="#f8fafc" font-size="15" text-anchor="middle">CDC Fabric · DynamoDB Streams / Debezium → Kafka</text>
                 <text x="430" y="216" fill="#94a3b8" font-size="12" text-anchor="middle">ordered, at-least-once, partitioned by aggregate id</text>
-                <rect x="80" y="280" width="700" height="110" rx="16" fill="#0b1220" stroke="#34d399" stroke-dasharray="6 5"/>
+                <rect class="node-pulse-green" x="80" y="280" width="700" height="110" rx="16" fill="#0b1220" stroke="#34d399" stroke-dasharray="6 5"/>
                 <text x="430" y="318" fill="#f8fafc" font-size="15" text-anchor="middle">Conductor saga context</text>
                 <text x="430" y="344" fill="#94a3b8" font-size="12" text-anchor="middle">task domain · retries · compensations · workflow_summary index</text>
-                <text x="430" y="366" fill="#67e8f9" font-size="12" text-anchor="middle">Workers: Java domain A  ·  Node domain B  ·  Graph writers</text>
-                <line x1="120" y1="120" x2="250" y2="160" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="330" y1="120" x2="360" y2="160" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="540" y1="120" x2="500" y2="160" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="745" y1="120" x2="610" y2="160" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="430" y1="240" x2="430" y2="280" stroke="#34d399" stroke-width="3"/>
+                <text x="430" y="366" fill="#67e8f9" font-size="12" text-anchor="middle">Workers: Java domain A · Node domain B · Graph writers</text>
+                <line class="flow-line" x1="120" y1="120" x2="280" y2="160" stroke="#38bdf8" stroke-width="2"/>
+                <line class="flow-line flow-line-reverse node-pulse-delay-1" x1="330" y1="120" x2="380" y2="160" stroke="#38bdf8" stroke-width="2"/>
+                <line class="flow-line-slow" x1="540" y1="120" x2="500" y2="160" stroke="#38bdf8" stroke-width="2"/>
+                <line class="flow-line node-pulse-delay-2" x1="745" y1="120" x2="610" y2="160" stroke="#38bdf8" stroke-width="2"/>
+                <line class="flow-line" x1="430" y1="240" x2="430" y2="280" stroke="#34d399" stroke-width="3"/>
+                <circle class="particle" r="5" fill="#38bdf8"><animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#saga-p1"/></animateMotion></circle>
+                <circle class="particle" r="4" fill="#818cf8"><animateMotion dur="3s" repeatCount="indefinite" begin="0.5s"><mpath href="#saga-p2"/></animateMotion></circle>
+                <circle class="particle" r="5" fill="#34d399"><animateMotion dur="2s" repeatCount="indefinite" begin="1s"><mpath href="#saga-p3"/></animateMotion></circle>
               </svg>
+              <div class="diagram-legend">
+                <span><i class="flow"></i> CDC event stream</span>
+                <span><i class="pulse"></i> Active service / worker</span>
+              </div>
               <figcaption>Services emit CDC events; Conductor owns saga progress, not business writes.</figcaption>
+            </figure>
+            <p>
+              Partition Kafka topics by aggregate id (ticket id, account id) so
+              ordering holds per saga instance. Cross-aggregate fan-out uses
+              separate consumer groups with idempotent handlers.
+            </p>
+          </section>
+
+          <section class="article-section" id="timeline">
+            <h2>Event timeline (single saga instance)</h2>
+            <p>
+              A ticket-create saga might emit six events in under two seconds.
+              Conductor advances only when the expected CDC envelope arrives.
+            </p>
+            <figure class="article-diagram diagram-live">
+              <svg viewBox="0 0 860 200" xmlns="http://www.w3.org/2000/svg">
+                <rect width="860" height="200" rx="24" fill="#0f172a"/>
+                <line x1="60" y1="100" x2="800" y2="100" stroke="#334155" stroke-width="2"/>
+                <circle class="node-pulse" cx="100" cy="100" r="14" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="100" y="135" fill="#94a3b8" font-size="10" text-anchor="middle">T+0ms</text>
+                <text x="100" y="72" fill="#e2e8f0" font-size="11" text-anchor="middle">Command</text>
+                <circle class="node-pulse node-pulse-delay-1" cx="240" cy="100" r="14" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="240" y="135" fill="#94a3b8" font-size="10" text-anchor="middle">T+40ms</text>
+                <text x="240" y="72" fill="#e2e8f0" font-size="11" text-anchor="middle">Ticket CDC</text>
+                <circle class="node-pulse node-pulse-delay-2" cx="400" cy="100" r="14" fill="#1e293b" stroke="#818cf8" stroke-width="2"/>
+                <text x="400" y="135" fill="#94a3b8" font-size="10" text-anchor="middle">T+120ms</text>
+                <text x="400" y="72" fill="#e2e8f0" font-size="11" text-anchor="middle">Notify task</text>
+                <circle class="node-pulse node-pulse-delay-3" cx="560" cy="100" r="14" fill="#1e293b" stroke="#34d399" stroke-width="2"/>
+                <text x="560" y="135" fill="#94a3b8" font-size="10" text-anchor="middle">T+180ms</text>
+                <text x="560" y="72" fill="#e2e8f0" font-size="11" text-anchor="middle">Graph edge</text>
+                <circle class="node-pulse-green" cx="720" cy="100" r="14" fill="#14532d" stroke="#34d399" stroke-width="2"/>
+                <text x="720" y="135" fill="#94a3b8" font-size="10" text-anchor="middle">T+220ms</text>
+                <text x="720" y="72" fill="#bbf7d0" font-size="11" text-anchor="middle">COMPLETE</text>
+                <line class="flow-line" x1="114" y1="100" x2="226" y2="100" stroke="#38bdf8" stroke-width="2"/>
+                <line class="flow-line-slow" x1="254" y1="100" x2="386" y2="100" stroke="#818cf8" stroke-width="2"/>
+                <line class="flow-line" x1="414" y1="100" x2="546" y2="100" stroke="#34d399" stroke-width="2"/>
+                <line class="flow-line flow-line-reverse" x1="574" y1="100" x2="706" y2="100" stroke="#34d399" stroke-width="2"/>
+              </svg>
+              <figcaption>Each dot is a durable checkpoint; Conductor never guesses state.</figcaption>
             </figure>
           </section>
 
           <section class="article-section" id="happy">
             <h2>Happy path vs compensation path</h2>
-            <figure class="article-diagram">
+            <figure class="article-diagram diagram-live">
               <svg viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <path id="happy-flow" d="M160,72 L770,72" fill="none"/>
+                </defs>
                 <rect width="860" height="280" rx="24" fill="#0f172a"/>
-                <rect x="20" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <rect class="node-pulse" x="20" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
                 <text x="90" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">Start saga</text>
-                <rect x="190" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <rect class="node-pulse node-pulse-delay-1" x="190" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
                 <text x="260" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">Create ticket</text>
-                <rect x="360" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+                <rect class="node-pulse node-pulse-delay-2" x="360" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#38bdf8"/>
                 <text x="430" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">Notify channel</text>
-                <rect x="530" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#34d399"/>
+                <rect class="node-pulse node-pulse-delay-3" x="530" y="40" width="140" height="64" rx="10" fill="#1e293b" stroke="#34d399"/>
                 <text x="600" y="78" fill="#e2e8f0" font-size="13" text-anchor="middle">Index graph</text>
-                <rect x="700" y="40" width="140" height="64" rx="10" fill="#14532d" stroke="#34d399"/>
+                <rect class="node-pulse-green" x="700" y="40" width="140" height="64" rx="10" fill="#14532d" stroke="#34d399"/>
                 <text x="770" y="78" fill="#bbf7d0" font-size="13" text-anchor="middle">COMPLETE</text>
-                <line x1="160" y1="72" x2="190" y2="72" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="330" y1="72" x2="360" y2="72" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="500" y1="72" x2="530" y2="72" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="670" y1="72" x2="700" y2="72" stroke="#34d399" stroke-width="2"/>
+                <line class="flow-line" x1="160" y1="72" x2="190" y2="72" stroke="#38bdf8" stroke-width="2"/>
+                <line class="flow-line-slow" x1="330" y1="72" x2="360" y2="72" stroke="#38bdf8" stroke-width="2"/>
+                <line class="flow-line" x1="500" y1="72" x2="530" y2="72" stroke="#38bdf8" stroke-width="2"/>
+                <line class="flow-line flow-line-reverse" x1="670" y1="72" x2="700" y2="72" stroke="#34d399" stroke-width="2"/>
+                <circle class="particle" r="6" fill="#38bdf8"><animateMotion dur="4s" repeatCount="indefinite"><mpath href="#happy-flow"/></animateMotion></circle>
                 <rect x="190" y="170" width="480" height="70" rx="12" fill="#3f1d1d" stroke="#fbbf24"/>
                 <text x="430" y="200" fill="#fde68a" font-size="13" text-anchor="middle">Compensation: reverse notify → tombstone ticket → emit failed event</text>
                 <text x="430" y="220" fill="#fcd34d" font-size="11" text-anchor="middle">Triggered when any downstream task times out or nacks</text>
-                <line x1="430" y1="104" x2="430" y2="170" stroke="#fbbf24" stroke-width="2" stroke-dasharray="5 4"/>
+                <line class="flow-line flow-line-reverse" x1="430" y1="104" x2="430" y2="170" stroke="#fbbf24" stroke-width="2"/>
               </svg>
+              <div class="diagram-legend">
+                <span><i class="flow"></i> Forward progress</span>
+                <span><i class="pulse"></i> Compensation branch</span>
+              </div>
               <figcaption>Forward path is linear; failure always runs a documented reverse sequence.</figcaption>
             </figure>
             <div class="flow-steps">
@@ -273,6 +341,7 @@
           <a href="#problem">Consistency problem</a>
           <a href="#why">Saga + CDC</a>
           <a href="#arch">Architecture</a>
+          <a href="#timeline">Event timeline</a>
           <a href="#happy">Happy vs compensate</a>
           <a href="#contract">Contract</a>
           <a href="#guardrails">Guardrails</a>
@@ -280,5 +349,6 @@
         </aside>
       </div>
     </main>
+    <script src="../assets/blog-diagrams.js" defer></script>
   </body>
 </html>
